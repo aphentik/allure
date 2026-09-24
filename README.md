@@ -50,7 +50,7 @@ Lien profond : `index.html?gpx=<url-du-gpx>` charge directement une trace (même
                   "name": "", "desc": "", "time": "11:28" }],
   "settings": { "ftp": 250, "kg": 75, "bikeKg": 8, "obj": "diesel", "advIF": 0.75,
                 "flatIF": 0.62, "draft": 0.2, "descentCapKmh": 48,
-                "seg": { "minGrad": 3, "minKm": 2, "dipKm": 2.5 } }
+                "seg": { "minGrad": 2.5, "minKm": 1.5, "dipKm": 2.5 } }
 }
 ```
 

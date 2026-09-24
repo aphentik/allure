@@ -4,30 +4,33 @@ import { llAtKm, nearestKm, hav } from './gpx.js';
 
 const ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
 function overpass(query) {
-  let i = 0;
+  let i = 0, retried = false;
   const tryNext = () => {
     if (i >= ENDPOINTS.length) return Promise.reject(new Error('overpass'));
     const url = ENDPOINTS[i++], ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 15000);
     return fetch(url, { method: 'POST', body: 'data=' + encodeURIComponent(query), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, signal: ctl.signal })
-      .then(r => { clearTimeout(tm); if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(r => { clearTimeout(tm);
+        if (r.status === 429 && !retried) { retried = true; i--; return new Promise(res => setTimeout(res, 6000)).then(tryNext); } // throttled: wait once, same endpoint
+        if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
       .catch(() => { clearTimeout(tm); return tryNext(); });
   };
   return tryNext();
 }
 const PRIO = n => n.tags.mountain_pass === 'yes' || n.tags.natural === 'saddle' ? 0 : (n.tags.natural === 'peak' ? 1 : 2);
 
-// Names unnamed climbs from pass/saddle/peak/place nodes within 400 m of the summit. Returns count named.
+// Names unnamed climbs: passes/saddles within 600 m, else peaks/places within 1 km of the summit. Returns count named.
+const MAXD = { 0: 600, 1: 1000, 2: 1000 };
 export function nameClimbsFromOSM(race, D) {
   const climbs = race.segments.filter(s => s.type === 'climb' && !s.name);
   if (!climbs.length) return Promise.resolve(0);
   const pts = climbs.map(s => llAtKm(race, D, s.to));
-  const q = '[out:json][timeout:20];(' + pts.map(p => { const a = 'around:400,' + p.lat.toFixed(5) + ',' + p.lon.toFixed(5);
+  const q = '[out:json][timeout:20];(' + pts.map(p => { const a = 'around:1000,' + p.lat.toFixed(5) + ',' + p.lon.toFixed(5);
     return 'node(' + a + ')["mountain_pass"="yes"]["name"];node(' + a + ')["natural"="saddle"]["name"];node(' + a + ')["natural"="peak"]["name"];node(' + a + ')["place"~"^(village|hamlet|locality|isolated_dwelling|neighbourhood)$"]["name"];'; }).join('') + ');out body;';
   return overpass(q).then(j => {
     const nodes = (j.elements || []).filter(n => n.tags && n.tags.name); let named = 0;
     climbs.forEach((s, i) => {
       const p = pts[i]; let best = null, bk = Infinity;
-      nodes.forEach(n => { const d = hav(p.lat, p.lon, n.lat, n.lon); if (d > 400) return; const k = PRIO(n) * 1000 + d; if (k < bk) { bk = k; best = n; } });
+      nodes.forEach(n => { const d = hav(p.lat, p.lon, n.lat, n.lon), pr = PRIO(n); if (d > MAXD[pr]) return; const k = pr * 1000 + d; if (k < bk) { bk = k; best = n; } });
       if (best) { s.name = best.tags.name; named++; }
     });
     return named;

@@ -2,8 +2,8 @@
 import { PROFILE_STEP_KM } from './gpx.js';
 import { uid } from './state.js';
 
-export const SEG_DEFAULTS = { minGrad: 3, minKm: 2, dipKm: 2.5 };
-const DIP_MAX_LOSS_M = 80, SHORT_LINK_KM = 3.5;
+export const SEG_DEFAULTS = { minGrad: 2.5, minKm: 1.5, dipKm: 2.5 };
+const DIP_MAX_LOSS_M = 80, SHORT_LINK_KM = 3.5, CLIMB_MIN_GAIN_M = 70;
 
 function meanGrad(P, i0, i1) { // % between profile indices
   const dk = P[i1][0] - P[i0][0]; return dk > 0 ? (P[i1][1] - P[i0][1]) / (dk * 1000) * 100 : 0;
@@ -40,7 +40,7 @@ export function autoSegments(D, params) {
   // 3. qualify climbs / 4. descents
   runs.forEach(r => {
     const len = P[r.i1][0] - P[r.i0][0], g = meanGrad(P, r.i0, r.i1), gain = P[r.i1][1] - P[r.i0][1];
-    if (r.c === 1 && !(len >= p.minKm && g >= p.minGrad && gain >= 100)) r.c = 0;
+    if (r.c === 1 && !(len >= p.minKm && g >= p.minGrad && gain >= CLIMB_MIN_GAIN_M)) r.c = 0;
     if (r.c === -1 && !(len >= 2 && g <= -3)) r.c = 0;
   });
   // 5. merge same-type neighbours

@@ -3,7 +3,13 @@ import { S, uid } from './state.js';
 import { llAtKm, nearestKm, hav } from './gpx.js';
 
 const ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+// 7-day localStorage cache keyed by query text: the same track is never queried twice
+const CACHE_TTL = 7 * 86400000;
+function qkey(q) { let h = 2166136261; for (let i = 0; i < q.length; i++) { h ^= q.charCodeAt(i); h = Math.imul(h, 16777619); } return 'allure-ov-' + (h >>> 0).toString(36); }
+function cacheGet(q) { try { const e = JSON.parse(localStorage.getItem(qkey(q)) || 'null'); if (e && Date.now() - e.t < CACHE_TTL) return e.j; } catch (e) {} return null; }
+function cacheSet(q, j) { try { const txt = JSON.stringify({ t: Date.now(), j }); if (txt.length < 400000) localStorage.setItem(qkey(q), txt); } catch (e) {} }
 function overpass(query) {
+  const hit = cacheGet(query); if (hit) return Promise.resolve(hit);
   let i = 0, retried = false;
   const tryNext = () => {
     if (i >= ENDPOINTS.length) return Promise.reject(new Error('overpass'));
@@ -12,6 +18,7 @@ function overpass(query) {
       .then(r => { clearTimeout(tm);
         if (r.status === 429 && !retried) { retried = true; i--; return new Promise(res => setTimeout(res, 6000)).then(tryNext); } // throttled: wait once, same endpoint
         if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(j => { cacheSet(query, j); return j; })
       .catch(() => { clearTimeout(tm); return tryNext(); });
   };
   return tryNext();

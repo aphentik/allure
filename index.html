@@ -149,19 +149,26 @@
   .modal{position:fixed;inset:0;background:rgba(6,12,18,.82);display:none;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto;z-index:50}
   .modal.open{display:flex}
   .sheet{background:#fff;color:#111;border-radius:12px;max-width:560px;width:100%;padding:18px}
+  .sheet.wide{max-width:920px}
   .sheet h3{font-family:'Barlow Condensed';font-weight:700;font-size:1.4rem;color:#111}
   .sheet p.hint{font-size:.78rem;color:#555;margin-bottom:12px}
   .sheet .close{float:right;margin:-2px -2px 0 10px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid #d0d0d0;background:#fff;color:#333;border-radius:50%;font-size:18px;font-weight:700;line-height:1;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12)}
   .sheet .close:hover{background:#c23b27;color:#fff;border-color:#c23b27}
-  .sticker-print{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-  .tt{width:132px;border:1px dashed #999;border-radius:6px;overflow:hidden;font-family:Arial,sans-serif}
-  .tt .h{background:#1c5e8c;color:#fff;text-align:center;padding:5px 3px}
-  .tt .h b{font-size:11px;display:block}.tt .h small{font-size:7px;opacity:.9}
-  .tt .r{padding:4px 5px;border-bottom:1px solid #ddd;font-size:8px;line-height:1.15;display:flex;justify-content:space-between}
+  .sticker-print{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+  .tt{width:230px;border:1px dashed #999;border-radius:6px;overflow:hidden;font-family:Arial,sans-serif}
+  .tt .h{background:#1c5e8c;color:#fff;text-align:center;padding:7px 4px}
+  .tt .h b{font-size:15px;display:block;letter-spacing:.5px}.tt .h small{font-size:10px;opacity:.9}
+  .tt .r{padding:6px 8px;border-bottom:1px solid #ddd;line-height:1.25}
   .tt .r.k{background:#fff4d6}.tt .r.c{background:#fbe9e9}.tt .r.d{background:#eef4fa}.tt .r.f{background:#f5f5f5}
-  .tt .r .km{font-weight:700;color:#111}.tt .r .w{font-weight:700;color:#c8641a}.tt .r.k .w{color:#c81c36}
-  .tt .r .rav{color:#1c6e8c;font-weight:700;font-size:7px}.tt .r .nm{color:#666;font-size:7px}
-  .tt .foot2{background:#111;color:#fff;text-align:center;font-size:6.5px;padding:4px 3px;line-height:1.3}
+  .tt .r.k{box-shadow:inset 3px 0 0 #1c5e8c}
+  .tt .rhead{font-size:12px}
+  .tt .rhead .km{font-weight:700;color:#111;font-family:'JetBrains Mono',monospace}.tt .rhead .nm{color:#222;font-weight:700}
+  .tt .meta{font-size:9.5px;color:#777;margin:1px 0}
+  .tt .rbot{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-top:2px}
+  .tt .rbot .w{font-weight:800;color:#c8641a;font-size:20px;letter-spacing:-.3px;margin-left:auto;white-space:nowrap}.tt .r.k .rbot .w{color:#c81c36}
+  .tt .r.d .rbot .w{font-size:13px}.tt .r.f .rbot .w{font-size:13px;color:#888}
+  .tt .rbot .rav{color:#1c6e8c;font-weight:700;font-size:9px}
+  .tt .foot2{background:#111;color:#fff;text-align:center;font-size:9px;padding:6px 4px;line-height:1.4}
   .st-ctrl{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center;margin:4px 0 16px}
   .st-orient{display:flex;border:1px solid #ccc;border-radius:8px;overflow:hidden}
   .st-orient button{font-family:Arial,sans-serif;font-weight:700;font-size:12px;color:#555;background:#f2f2f2;border:none;padding:8px 12px;cursor:pointer}
@@ -179,16 +186,18 @@
   .gx-fount button{font-family:Arial,sans-serif;font-weight:700;font-size:12px;color:#555;background:#f2f2f2;border:1px solid #ccc;border-radius:8px;padding:9px 14px;cursor:pointer}
   .gx-fount button[aria-pressed="true"]{background:#2fae86;color:#fff;border-color:#2fae86}
   .ttl{border:1px dashed #999;border-radius:6px;overflow-x:auto;max-width:100%;font-family:Arial,sans-serif}
-  .ttl .hh{background:#1c5e8c;color:#fff;text-align:center;font-size:8px;font-weight:700;padding:4px}
+  .ttl .hh{background:#1c5e8c;color:#fff;text-align:center;font-size:11px;font-weight:700;padding:6px}
   .ttl .lrow{display:flex}
-  .ttl .c{flex:1 0 64px;min-width:64px;border-right:1px solid #ddd;padding:5px 4px}
-  .ttl .c.k{background:#fff4d6;box-shadow:inset 0 2px 0 #1c5e8c}.ttl .c.c{background:#fbe9e9}.ttl .c.d{background:#eef4fa}.ttl .c.f{background:#f5f5f5}
-  .ttl .c .km{font-weight:700;color:#111;font-size:8px}
-  .ttl .c .nm{color:#666;font-size:7px;line-height:1.1;min-height:15px;margin:1px 0}
-  .ttl .c .w{font-weight:700;color:#c8641a;font-size:10px}.ttl .c.k .w{color:#c81c36}
-  .ttl .c .rav{color:#1c6e8c;font-weight:700;font-size:6.5px;margin-top:1px}
-  .ttl .foot2{background:#111;color:#fff;text-align:center;font-size:7.5px;padding:5px 4px}
-  .tt .r .tm,.ttl .c .tm{color:#777;font-weight:700}
+  .ttl .c{flex:1 0 96px;min-width:96px;border-right:1px solid #ddd;padding:7px 6px}
+  .ttl .c.k{background:#fff4d6;box-shadow:inset 0 3px 0 #1c5e8c}.ttl .c.c{background:#fbe9e9}.ttl .c.d{background:#eef4fa}.ttl .c.f{background:#f5f5f5}
+  .ttl .c .km{font-weight:700;color:#111;font-size:11px;font-family:'JetBrains Mono',monospace}
+  .ttl .c .nm{color:#222;font-weight:700;font-size:10px;line-height:1.15;margin:2px 0}
+  .ttl .c .meta{color:#777;font-size:8.5px;line-height:1.2;margin:2px 0}
+  .ttl .c .w{font-weight:800;color:#c8641a;font-size:20px;margin-top:5px;letter-spacing:-.3px}.ttl .c.k .w{color:#c81c36}
+  .ttl .c.d .w{font-size:13px}.ttl .c.f .w{font-size:13px;color:#888}
+  .ttl .c .rav{color:#1c6e8c;font-weight:700;font-size:8.5px;margin-top:2px;line-height:1.2}
+  .ttl .foot2{background:#111;color:#fff;text-align:center;font-size:10px;padding:6px 4px;line-height:1.4}
+  .tt .meta .warn,.ttl .c .meta .warn{color:#c23b27;font-weight:700}
   .tt .foot2 .sos,.ttl .foot2 .sos{color:#f2c078;font-weight:700}
   @media print{body{background:#fff!important}.topbar,.actions,.actionbar,.panel .obj,.modal{display:none!important}}
   .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
@@ -364,7 +373,7 @@
   </div>
 </div>
 
-<div class="modal" id="stickerModal"><div class="sheet">
+<div class="modal" id="stickerModal"><div class="sheet wide">
   <button class="close" id="mClose"></button>
   <h3 id="mTitle"></h3><p class="hint" id="mHint"></p>
   <div class="st-ctrl">
@@ -396,7 +405,7 @@ var L={
   metaLine:"temps roulé estimé (hors arrêts)",metaArr:"arrivée vers",metaAvg1:"moyenne",metaAvg2:"W/kg en montée",
   nutTitle:"Ravitaillement : que faut-il emporter ?",
   nutSub:"Sur {dur} de course : ≈ {need} de glucides et ~{water} d'eau à couvrir.",
-  labGph:"Cible glucides par heure",labGel:"Glucides par gel ou barre",labBidon:"Glucides par bidon iso",labBsize:"Taille d'un bidon",nutSrcTitle:"Source des glucides",nm1:"Gels / barres",nm2:"Les deux",nm3:"Iso",nutRvTitle:"Nourriture",rv1:"Utiliser les ravitos",rv2:"Autonome",nutRatesT:"Cibles horaires",nutCarryT:"À emporter au départ",nutPlanT:"Plan par ravito",nutIsoTitle:"Bidons : eau plate ↔ iso",nutIsoLab:"Part des bidons en iso",nutStopsTitle:"Arrêts ravito prévus",nbWater:"eau plate",nbIso:"tout iso",nbMix:"{p}% en iso",nrTarget:"Objectif : {g} g/h de glucides · {l} L/h d'eau",nrGel2:"Gels/barres : ~{gc} g/h → 1 ~toutes les {m} min",nrGelNone:"Gels/barres : au besoin (glucides couverts par l'iso)",nrIso2:"Iso : ~{ic} g/h de glucides",nrBottles:"Bidons : 1 ({size} L) ~toutes les {m} min · {split}",nlSkip:"sautable",nlNone:"aucun",nrGelRhythm:"Rythme : ~1 gel/barre toutes les {m} min",ncIsoB:"bidons d'iso à préparer",ncWaterB:"bidons d'eau claire",ncBike:"2 bidons sur le vélo, refaits aux arrêts conseillés.",nlSummary:"Arrêts conseillés : {req} · sautables : {opt}",nrGel:"{g} g/h de glucides → 1 gel/barre ~toutes les {m} min",nrGelIso:"{g} g/h de glucides, couverts par l'iso",nrWater:"{l} L/h d'eau → 1 bidon ({size} L) ~toutes les {m} min",ncGels:"gels/barres à emporter",ncIso:"doses d'iso (pour refaire les bidons)",ncBottles:"bidons sur le vélo",ncRavitoNote:"En plus : ~{n} gels/barres à prendre aux ravitos (Maurten Gel 100 = 25 g dispo). On remplit les bidons à chaque ravito.",ncAutoNote:"Mode autonome : tout est sur toi ; les ravitos ne servent qu'au plein d'eau.",nlLeg:"Sur ce tronçon ({d}) : boire ~{l} L · manger {g} gel(s)",nlRefill:"puis plein d'eau",nlRefillFood:"puis plein eau + solides",nlFinish:"arrivée",nlTooLong:"⚠ tronçon long : 2 bidons peuvent ne pas suffire (rationner / point d'eau)",
+  labGph:"Cible glucides par heure",labGel:"Glucides par gel ou barre",labBidon:"Glucides par bidon iso",labBsize:"Taille d'un bidon",nutSrcTitle:"Source des glucides",nm1:"Gels / barres",nm2:"Les deux",nm3:"Iso",nutRvTitle:"Nourriture",rv1:"Utiliser les ravitos",rv2:"Autonome",nutRatesT:"Cibles horaires",nutCarryT:"À emporter au départ",nutPlanT:"Plan par ravito",nutIsoTitle:"Bidons : eau plate ↔ iso",nutIsoLab:"Part des bidons en iso",nutStopsTitle:"Arrêts ravito prévus",nbWater:"eau plate",nbIso:"tout iso",nbMix:"{p}% en iso",nrTarget:"Objectif : {g} g/h de glucides · {l} L/h d'eau",nrGel2:"Gels/barres : ~{gc} g/h → 1 ~toutes les {m} min",nrGelNone:"Gels/barres : au besoin (glucides couverts par l'iso)",nrIso2:"Iso : ~{ic} g/h de glucides",nrBottles:"Bidons : 1 ({size} L) ~toutes les {m} min · {split}",nlSkip:"sautable",nlNone:"aucun",pdfRhythm:"Rythme : ~1 gel toutes les {m} min · {w} bidons d'eau claire",nlTooLongShort:"(2 bidons justes)",nlSkipList:"Sautables :",pdfFount:"Fontaines (points d'eau) :",nrGelRhythm:"Rythme : ~1 gel/barre toutes les {m} min",ncIsoB:"bidons d'iso à préparer",ncWaterB:"bidons d'eau claire",ncBike:"2 bidons sur le vélo, refaits aux arrêts conseillés.",nlSummary:"Arrêts conseillés : {req} · sautables : {opt}",nrGel:"{g} g/h de glucides → 1 gel/barre ~toutes les {m} min",nrGelIso:"{g} g/h de glucides, couverts par l'iso",nrWater:"{l} L/h d'eau → 1 bidon ({size} L) ~toutes les {m} min",ncGels:"gels/barres à emporter",ncIso:"doses d'iso (pour refaire les bidons)",ncBottles:"bidons sur le vélo",ncRavitoNote:"En plus : ~{n} gels/barres à prendre aux ravitos (Maurten Gel 100 = 25 g dispo). On remplit les bidons à chaque ravito.",ncAutoNote:"Mode autonome : tout est sur toi ; les ravitos ne servent qu'au plein d'eau.",nlLeg:"Sur ce tronçon ({d}) : boire ~{l} L · manger {g} gel(s)",nlRefill:"puis plein d'eau",nlRefillFood:"puis plein eau + solides",nlFinish:"arrivée",nlTooLong:"⚠ tronçon long : 2 bidons peuvent ne pas suffire (rationner / point d'eau)",
   slabGel:"Gels / barres à emporter",slabBidon:"Bidons iso (bus sur toute la course)",unGel:"unités",unBid:"bidons",
   gCarried:"emporté : {c}",gGph:"soit {n} g/h",
   vShort:"Il manque {miss} g, soit ~{n} gels de plus pour couvrir le besoin.",
@@ -421,10 +430,10 @@ var L={
   wxAdvCool:"Sommets frais ({lo}–{hi}° au Galibier) : un coupe-vent léger reste utile en descente.",
   wxAdvRain:"Risque de pluie ({p}%) : prudence en descente, pense au coupe-vent imperméable.",
   foot:"<b>Barrières horaires.</b> 4 points de coupure (rouge = en retard sur l'estimation, vert = dans les temps, selon l'heure de départ). Temps limite total : <b>11h45</b> pour rejoindre l'arrivée.<br><br><b>Comment lire.</b> Les watts sont les cibles <b>en montée</b>. Le <b style='color:var(--gold)'>passage</b> (or) est l'heure estimée au sommet de chaque col. Lignes grises = descentes/vallées, avec les ravitos (bleu). Après le Sarenne, c'est une descente jusqu'à l'Alpe d'Huez (Rif Nel 700 m à 7,5 %).<br><br><b>Le temps est une estimation</b> (modèle physique, vélo ~8 kg). +20 à 40 min d'arrêts ravitos non inclus. Pace à la puissance et au ressenti, jamais à la FC quand il fait chaud.<br><br><b>Horaires SAS.</b> Officiels (roadbook) : départs échelonnés toutes les 7 min 30, du SAS 0 (6h30) au SAS 16 (8h30). Se placer dans le SAS avant sa fermeture.",
-  mTitle:"Générateur de sticker",mClose:"✕",mDl:"📄 Télécharger le sticker (PDF)",soP:"Portrait · top tube",soL:"Paysage · cintre",stSOS:"SOS +33 9 72 45 60 01",mSizeW:"Largeur (mm)",mSizeH:"Hauteur (mm)",stNut1:"≈ {g}/h barres · {b}/h bidons",stNut2:"{gph} g/h · {water} L eau/h · sel",stNoteP:"Imprimer à 100 % · découper, plastifier, coller sur le top tube.",stNoteL:"Imprimer à 100 % · découper, plastifier, coller sur la potence / le cintre.",
+  mTitle:"Générateur de sticker",mClose:"✕",mDl:"📄 Télécharger le sticker (PDF)",soP:"Portrait · top tube",soL:"Paysage · cintre",stSOS:"SOS +33 9 72 45 60 01",mSizeW:"Largeur (mm)",mSizeH:"Hauteur (mm)",stNut1:"≈ {g} barres/h · {b} bidons/h",stNut2:"{gph} g/h · {water} L eau/h · sel",stNoteP:"Imprimer à 100 % · découper, plastifier, coller sur le top tube.",stNoteL:"Imprimer à 100 % · découper, plastifier, coller sur la potence / le cintre.",
   gpxBtn:"🗺️ Export GPS",gxTitle:"Export GPS perso",gxHint:"Trace + points utiles (ravitos, pied/sommet de col avec cible watts, dangers, barrières), selon les réglages (FTP, SAS, objectif). Choisir le compteur.",gxAutre:"Autre",gxDlGpx:"⬇ Télécharger le GPX",gxDlTcx:"⬇ Télécharger le TCX",gxLoading:"Préparation du fichier…",gxError:"Trace indisponible (fonctionne sur le site en ligne).",gxPied:"pied de col",gxRavito:"ravito",gxFount:"Fontaine",gxFountDesc:"point d'eau (non officiel)",gxFountBtn:"💧 Fontaines",gxFountInc:"💧 Ajouter les fontaines (points d'eau non officiels)",gxSummit:"sommet",gxAt:"à",gxAim:"viser",gxPass:"passage estimé",gxBarrier:"Barrière",gxBarrierShort:"Barriere",gxDanger:"Danger",gxDangerShort:"Danger",gxNote_coros:"<b>Coros</b> : ouvrir le GPX depuis l'app COROS puis enregistrer la route. Les waypoints s'affichent (page dédiée + distance au prochain).",gxNote_wahoo:"<b>Wahoo</b> : importer le GPX (app ELEMNT, ou via komoot / RideWithGPS). Waypoints affichés sur BOLT 3 / ROAM 3 / ELEMNT ACE ; sur les anciens, en liste de repères.",gxNote_garmin:"<b>Garmin</b> : fichier <b>TCX</b>. <span class='warn'>Ne pas passer par Garmin Connect</span> (il supprime les points à l'import). Brancher le compteur en USB et copier le TCX dans le dossier <b>Garmin/NewFiles</b> : les points (ravito, sommet, danger, barrière) apparaîtront pendant la navigation. Sans USB : importer le parcours dans <b>RideWithGPS</b> puis synchroniser avec Garmin (les points passent en course points).",gxNote_hammerhead:"<span class='warn'>Hammerhead Karoo</span> : le Karoo n'affiche pas les points d'un GPX chargé directement. Importer d'abord la route dans <b>RideWithGPS</b> (les points sont conservés), puis synchroniser avec le Karoo.",gxNote_autre:"GPX standard avec waypoints, compatible avec la plupart des apps/compteurs qui lisent les waypoints GPX.",
   mHint:"Basé sur les réglages (FTP, objectif, nutrition). Choisir l'orientation et la taille. PDF vectoriel à imprimer à 100 %, à découper et plastifier.",
-  stValley:"Vallee",stWarm:"echauffe",stDesc:"desc",stDrink:"boire",stMantra1:"Croix Fer & Galibier : se retenir.",stMantra2:"Pace watts pas FC · 60-80g+sel/h",
+  stValley:"Vallee",stWarm:"echauffe",stDesc:"desc",stDrink:"boire",stFount:"eau",stMantra1:"Croix Fer & Galibier : se retenir.",stMantra2:"Pace watts pas FC · 60-80g+sel/h",
   stNote:"Largeur 35 mm · imprimer à 100% (taille réelle) · découper, plastifier, coller sur le top-tube.",
   pdfMoving:"Temps roulé estimé :",pdfArr:"arrivée ~",pdfStart:"Départ",pdfNut:"Ravitaillement",
   pdfNutLine:"Besoin ~{need} g de glucides ({gph} g/h) · boire ~{water} L/h.",
@@ -441,7 +450,7 @@ var L={
   metaLine:"estimated moving time (excl. stops)",metaArr:"arrival around",metaAvg1:"avg",metaAvg2:"W/kg on climbs",
   nutTitle:"Nutrition: what to carry?",
   nutSub:"Over {dur}: ≈ {need} of carbs and ~{water} of water to cover.",
-  labGph:"Target carbs per hour",labGel:"Carbs per gel or bar",labBidon:"Carbs per iso bottle",labBsize:"Bottle size",nutSrcTitle:"Carb source",nm1:"Gels / bars",nm2:"Both",nm3:"Iso",nutRvTitle:"Food",rv1:"Use aid stations",rv2:"Self-sufficient",nutRatesT:"Hourly targets",nutCarryT:"Pack at the start",nutPlanT:"Aid-station plan",nutIsoTitle:"Bottles: plain water ↔ iso",nutIsoLab:"Share of bottles as iso",nutStopsTitle:"Planned aid-station stops",nbWater:"plain water",nbIso:"all iso",nbMix:"{p}% iso",nrTarget:"Target: {g} g/h carbs · {l} L/h water",nrGel2:"Gels/bars: ~{gc} g/h → 1 ~every {m} min",nrGelNone:"Gels/bars: as needed (carbs from iso)",nrIso2:"Iso: ~{ic} g/h of carbs",nrBottles:"Bottles: 1 ({size} L) ~every {m} min · {split}",nlSkip:"skippable",nlNone:"none",nrGelRhythm:"Rhythm: ~1 gel/bar every {m} min",ncIsoB:"iso bottles to prepare",ncWaterB:"plain-water bottles",ncBike:"2 bottles on the bike, refilled at the recommended stops.",nlSummary:"Recommended stops: {req} · skippable: {opt}",nrGel:"{g} g/h of carbs → 1 gel/bar ~every {m} min",nrGelIso:"{g} g/h of carbs, covered by iso",nrWater:"{l} L/h of water → 1 bottle ({size} L) ~every {m} min",ncGels:"gels/bars to carry",ncIso:"iso doses (to refill bottles)",ncBottles:"bottles on the bike",ncRavitoNote:"Plus ~{n} gels/bars to grab at aid stations (Maurten Gel 100 = 25 g available). Refill bottles at every stop.",ncAutoNote:"Self-sufficient: carry it all; aid stations only for water refills.",nlLeg:"On this leg ({d}): drink ~{l} L · eat {g} gel(s)",nlRefill:"then refill water",nlRefillFood:"then refill water + food",nlFinish:"finish",nlTooLong:"⚠ long leg: 2 bottles may not be enough (ration / water point)",
+  labGph:"Target carbs per hour",labGel:"Carbs per gel or bar",labBidon:"Carbs per iso bottle",labBsize:"Bottle size",nutSrcTitle:"Carb source",nm1:"Gels / bars",nm2:"Both",nm3:"Iso",nutRvTitle:"Food",rv1:"Use aid stations",rv2:"Self-sufficient",nutRatesT:"Hourly targets",nutCarryT:"Pack at the start",nutPlanT:"Aid-station plan",nutIsoTitle:"Bottles: plain water ↔ iso",nutIsoLab:"Share of bottles as iso",nutStopsTitle:"Planned aid-station stops",nbWater:"plain water",nbIso:"all iso",nbMix:"{p}% iso",nrTarget:"Target: {g} g/h carbs · {l} L/h water",nrGel2:"Gels/bars: ~{gc} g/h → 1 ~every {m} min",nrGelNone:"Gels/bars: as needed (carbs from iso)",nrIso2:"Iso: ~{ic} g/h of carbs",nrBottles:"Bottles: 1 ({size} L) ~every {m} min · {split}",nlSkip:"skippable",nlNone:"none",pdfRhythm:"Rhythm: ~1 gel every {m} min · {w} plain-water bottles",nlTooLongShort:"(2 bottles tight)",nlSkipList:"Skippable:",pdfFount:"Fountains (water points):",nrGelRhythm:"Rhythm: ~1 gel/bar every {m} min",ncIsoB:"iso bottles to prepare",ncWaterB:"plain-water bottles",ncBike:"2 bottles on the bike, refilled at the recommended stops.",nlSummary:"Recommended stops: {req} · skippable: {opt}",nrGel:"{g} g/h of carbs → 1 gel/bar ~every {m} min",nrGelIso:"{g} g/h of carbs, covered by iso",nrWater:"{l} L/h of water → 1 bottle ({size} L) ~every {m} min",ncGels:"gels/bars to carry",ncIso:"iso doses (to refill bottles)",ncBottles:"bottles on the bike",ncRavitoNote:"Plus ~{n} gels/bars to grab at aid stations (Maurten Gel 100 = 25 g available). Refill bottles at every stop.",ncAutoNote:"Self-sufficient: carry it all; aid stations only for water refills.",nlLeg:"On this leg ({d}): drink ~{l} L · eat {g} gel(s)",nlRefill:"then refill water",nlRefillFood:"then refill water + food",nlFinish:"finish",nlTooLong:"⚠ long leg: 2 bottles may not be enough (ration / water point)",
   slabGel:"Gels / bars to carry",slabBidon:"Iso bottles (over the whole race)",unGel:"units",unBid:"bottles",
   gCarried:"carried: {c}",gGph:"= {n} g/h",
   vShort:"You're short {miss} g, about {n} more gels to cover your need.",
@@ -466,10 +475,10 @@ var L={
   wxAdvCool:"Cool summits ({lo}–{hi}° at the Galibier): a light wind vest still helps on descents.",
   wxAdvRain:"Rain risk ({p}%): careful on descents, bring a waterproof.",
   foot:"<b>Time cut-offs.</b> 4 checkpoints (red = behind the estimate, green = within time, based on your start time). Overall time limit: <b>11h45</b> to reach the finish.<br><br><b>How to read.</b> Watts are your targets <b>on climbs</b>. The <b style='color:var(--gold)'>pass time</b> (gold) is the estimated clock time at each summit. Grey lines = descents/valleys, with aid stations (blue). After Sarenne it's a descent to Alpe d'Huez (Rif Nel 700 m at 7.5%).<br><br><b>Times are estimates</b> (physics model, ~8 kg bike). +20 to 40 min of aid-station stops not included. Pace by power and feel, never by heart rate in the heat.<br><br><b>Wave times.</b> Official (roadbook): starts every 7 min 30 s, from wave 0 (6:30) to wave 16 (8:30). Be in your wave before it closes.",
-  mTitle:"Sticker generator",mClose:"✕",mDl:"📄 Download sticker (PDF)",soP:"Portrait · top tube",soL:"Landscape · bar",stSOS:"SOS +33 9 72 45 60 01",mSizeW:"Width (mm)",mSizeH:"Height (mm)",stNut1:"≈ {g}/h bars · {b}/h bottles",stNut2:"{gph} g/h · {water} L water/h · salt",stNoteP:"Print at 100% · cut, laminate, stick on the top-tube.",stNoteL:"Print at 100% · cut, laminate, stick on the stem / bar.",
+  mTitle:"Sticker generator",mClose:"✕",mDl:"📄 Download sticker (PDF)",soP:"Portrait · top tube",soL:"Landscape · bar",stSOS:"SOS +33 9 72 45 60 01",mSizeW:"Width (mm)",mSizeH:"Height (mm)",stNut1:"≈ {g} bars/h · {b} bottles/h",stNut2:"{gph} g/h · {water} L water/h · salt",stNoteP:"Print at 100% · cut, laminate, stick on the top-tube.",stNoteL:"Print at 100% · cut, laminate, stick on the stem / bar.",
   gpxBtn:"🗺️ GPS export",gxTitle:"Custom GPS export",gxHint:"Route + useful points (aid stations, climb foot/summit with power target, hazards, cut-offs), based on your settings (FTP, wave, goal). Pick your head unit.",gxAutre:"Other",gxDlGpx:"⬇ Download GPX",gxDlTcx:"⬇ Download TCX",gxLoading:"Preparing file…",gxError:"Route unavailable (works on the live site).",gxPied:"climb foot",gxRavito:"aid station",gxFount:"Fountain",gxFountDesc:"water point (unofficial)",gxFountBtn:"💧 Fountains",gxFountInc:"💧 Add fountains (unofficial water points)",gxSummit:"summit",gxAt:"at",gxAim:"aim",gxPass:"est. pass",gxBarrier:"Cut-off",gxBarrierShort:"Cut-off",gxDanger:"Hazard",gxDangerShort:"Hazard",gxNote_coros:"<b>Coros</b>: open the GPX from the COROS app, then save the route. Waypoints show up (dedicated page + distance to next).",gxNote_wahoo:"<b>Wahoo</b>: import the GPX (ELEMNT app, or via komoot / RideWithGPS). Waypoints show on BOLT 3 / ROAM 3 / ELEMNT ACE; on older units, in the cue list.",gxNote_garmin:"<b>Garmin</b>: <b>TCX</b> file. <span class='warn'>Do not use Garmin Connect</span> (it strips course points on import). Plug the unit via USB and copy the TCX into the <b>Garmin/NewFiles</b> folder: the points (aid station, summit, hazard, cut-off) show up during navigation. No USB: import the route into <b>RideWithGPS</b>, then sync to Garmin (points carry over as course points).",gxNote_hammerhead:"<span class='warn'>Hammerhead Karoo</span>: the Karoo does not show points from a directly-loaded GPX. First import the route into <b>RideWithGPS</b> (points are kept), then sync to the Karoo.",gxNote_autre:"Standard GPX with waypoints, works with most apps/units that read GPX waypoints.",
   mHint:"Based on your settings (FTP, goal, nutrition). Pick orientation and size. Vector PDF to print at 100%, then cut and laminate.",
-  stValley:"Valley",stWarm:"warm up",stDesc:"desc",stDrink:"drink",stMantra1:"Croix de Fer & Galibier: hold back.",stMantra2:"Pace by power not HR · 60-80g+salt/h",
+  stValley:"Valley",stWarm:"warm up",stDesc:"desc",stDrink:"drink",stFount:"water",stMantra1:"Croix de Fer & Galibier: hold back.",stMantra2:"Pace by power not HR · 60-80g+salt/h",
   stNote:"35 mm wide · print at 100% (actual size) · cut, laminate, stick on the top-tube.",
   pdfMoving:"Estimated moving time:",pdfArr:"arrival ~",pdfStart:"Start",pdfNut:"Nutrition",
   pdfNutLine:"Need ~{need} g of carbs ({gph} g/h) · drink ~{water} L/h.",
@@ -704,7 +713,7 @@ function computePlanData(){
     else rows.push({type:'liaison',name:NM(s.name),from:s.from,to:s.to,tSec:t2,passSec:startSec+cum,rav:rav,bar:bar});
   });
   var np=nutritionPlan();
-  var nutri={gph:np.gph,need:np.need,water:np.water.toFixed(1),gels:np.gelsToCarry,iso:np.isoDoses,ravitoGels:np.ravitoGels,ravito:np.ravito};
+  var nutri={gph:np.gph,need:np.need,water:np.water.toFixed(1),gels:np.gelsToCarry,iso:np.isoDoses,waterBottles:np.waterBottles,ravitoGels:np.ravitoGels,ravito:np.ravito,perGelMin:np.perGelMin,gelsPerH:np.gelsPerH,stops:np.stops,optCodes:np.optCodes};
   return {ftp:ftp,kg:kg,startSec:startSec,totalSec:cum,arrival:startSec+cum,avgWkg:wkgSum/(nClimb||1),rows:rows,nutri:nutri};
 }
 function objLabel(){return t('o'+(obj==='chill'?'1':obj==='diesel'?'2':'3'));}
@@ -750,7 +759,17 @@ function generatePlanPDF(){
   doc.setFont('helvetica','normal');doc.setFontSize(8.6);doc.setTextColor.apply(doc,gray);doc.text(pdfSafe(fmtn(t('pdfNutLine'),{need:d.nutri.need,gph:d.nutri.gph,water:d.nutri.water})),M,y);y+=4.7;
   var isoTxt=d.nutri.iso>0?(d.nutri.iso+(lang==='en'?' iso doses':' doses iso')):(lang==='en'?'plain-water bottles':'bidons eau plate');
   var gelsTxt=d.nutri.gels+(d.nutri.ravito==='ravitos'&&d.nutri.ravitoGels>0?(lang==='en'?' (+~'+d.nutri.ravitoGels+' at aid stations)':' (+~'+d.nutri.ravitoGels+' aux ravitos)'):'');
-  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor.apply(doc,ink);doc.text(pdfSafe(fmtn(t('pdfNutCarry'),{gels:gelsTxt,iso:isoTxt})),M,y);y+=6.5;
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor.apply(doc,ink);doc.text(pdfSafe(fmtn(t('pdfNutCarry'),{gels:gelsTxt,iso:isoTxt})),M,y);y+=4.6;
+  if(d.nutri.gelsPerH>0.05){doc.setFont('helvetica','normal');doc.setFontSize(8.2);doc.setTextColor.apply(doc,gray);doc.text(pdfSafe(fmtn(t('pdfRhythm'),{m:Math.round(d.nutri.perGelMin),w:d.nutri.waterBottles})),M,y);y+=6;}else y+=1.5;
+  doc.setFont('helvetica','bold');doc.setFontSize(8.6);doc.setTextColor.apply(doc,ink);doc.text(pdfSafe(t('nutPlanT')),M,y);y+=4.4;
+  doc.setFont('helvetica','normal');doc.setFontSize(7.7);
+  d.nutri.stops.forEach(function(l){if(!l.required)return;if(y>286){doc.addPage();y=18;}
+    doc.setTextColor.apply(doc,l.tooLong?red:gray);
+    var line=(l.finish?t('nlFinish'):l.code)+' km'+l.km+' · '+l.clock+' · '+fmtDur(l.durSec)+' : '+l.waterL.toFixed(1)+' L, '+Math.round(l.gels)+' gel'+(l.tooLong?'  '+t('nlTooLongShort'):'');
+    doc.text(pdfSafe(line),M+2,y);y+=3.7;});
+  if(d.nutri.optCodes.length){doc.setTextColor(150,150,150);doc.text(pdfSafe(t('nlSkipList')+' '+d.nutri.optCodes.join(', ')),M+2,y);y+=3.7;}
+  if(showFountains){doc.setTextColor(38,150,110);doc.text(pdfSafe(t('pdfFount')+' '+FOUNTAINS.map(function(k){return Math.round(k);}).join(', km ').replace(/^/,'km ')),M+2,y);y+=3.7;}
+  y+=2.5;
   doc.setFont('helvetica','normal');doc.setFontSize(7.3);doc.setTextColor(140,140,140);
   [t('pdfN1'),t('pdfN2'),t('pdfN3')].forEach(function(n){var w=doc.splitTextToSize(pdfSafe(n),Wp-2*M);doc.text(w,M,y);y+=w.length*3.4+1.2;});
   dl(doc.output('blob'),'sas-to-summit-plan.pdf');
@@ -760,25 +779,36 @@ var stDim={portrait:38,landscape:28}; // portrait = largeur mm ; landscape = hau
 function stickerCells(){
   var ftp=Math.max(60,+document.getElementById('ftp').value||0),kg=Math.max(35,+document.getElementById('kg').value||0),base=baseIntensity();
   var segc=currentSegc(),startSec=parseStart();
+  var np=nutritionPlan(),stopMap={};np.stops.forEach(function(x){stopMap[x.code]=x;});
+  // ravitos : code + km exact ; sautable entre parenthèses ; fontaines (nombre) si toggle global actif
+  function ravTxt(s){var parts=(s.ravitos||[]).map(function(r){var st=stopMap[r.k],lab=(r.k==='ARR')?'ARR':(r.k+' km'+r.km);return (st&&!st.required)?'('+lab+')':lab;});
+    if(showFountains){var nf=FOUNTAINS.filter(function(k){return k>=s.from&&k<s.to;}).length;if(nf)parts.push('+'+nf+' '+t('stFount'));}
+    return parts.join('  ');}
   var cells=[{t:'f',km:'0-14',nm:t('stValley'),w:t('stWarm'),rav:''}];
-  SEG.forEach(function(s){var rav=(s.ravitos||[]).map(function(r){return r.k+' km'+Math.round(r.km);}).join('  ');var wn=s.warn?' · '+s.warn[lang]:'';
-    if(s.type==='climb'){var pct=Math.max(0.55,base+s.delta),w=Math.round(ftp*pct),spd=climbSpeed(w,kg+8,s.grad),t2=(s.to-s.from)*1000/spd;cells.push({t:s.key?'k':'c',km:Math.round(s.from)+'-'+Math.round(s.to),nm:NM(s.name)+wn,w:w+'w',tm:fmtDur(t2),pass:fmtClock(startSec+cumSecAt(segc,s.to)),rav:rav});}
-    else if(rav){cells.push({t:'d',km:Math.round(s.from)+'-'+Math.round(s.to),nm:t('stDesc')+wn,w:t('stDrink'),rav:rav});}});
-  var np=nutritionPlan();
+  SEG.forEach(function(s){var rav=ravTxt(s),warn=s.warn?s.warn[lang]:'';
+    if(s.type==='climb'){var pct=Math.max(0.55,base+s.delta),w=Math.round(ftp*pct),spd=climbSpeed(w,kg+8,s.grad),t2=(s.to-s.from)*1000/spd;
+      cells.push({t:s.key?'k':'c',km:Math.round(s.from)+'-'+Math.round(s.to),nm:NM(s.name),w:w+'w',key:s.key,tm:fmtDur(t2),pass:fmtClock(startSec+cumSecAt(segc,s.to)),warn:warn,rav:rav});}
+    else if(rav||warn){cells.push({t:'d',km:Math.round(s.from)+'-'+Math.round(s.to),nm:t('stDesc'),w:t('stDrink'),warn:warn,rav:rav});}});
   var nutri={l1:fmtn(t('stNut1'),{g:np.gelsPerH.toFixed(1),b:np.bottlesPerH.toFixed(1)}),l2:fmtn(t('stNut2'),{gph:np.gph,water:np.water.toFixed(1)})};
   return {ftp:ftp,cells:cells,nutri:nutri};}
 var STBG={k:[255,244,214],c:[251,233,233],d:[238,244,250],f:[245,245,245]};
 function drawStickerPortrait(doc,sc){
-  var W=stDim.portrait,f=W/35,GAP=10,hdr=12*f,rowH=9*f,foot=13*f,yTop=16;
+  var W=stDim.portrait,f=W/35,GAP=10,hdr=12*f,rowH=10.5*f,foot=13*f,yTop=16,tw=W-3.6*f;
   var totalH=hdr+sc.cells.length*rowH+foot,copies=(W*2+GAP<=200)?2:1,x0=(210-(W*copies+GAP*(copies-1)))/2;
   function strip(x){var y=yTop;
     doc.setFillColor(28,94,140);doc.rect(x,y,W,hdr,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(9*f);doc.text("ETAPE DU TOUR",x+W/2,y+5*f,{align:'center'});doc.setFontSize(5.5*f);doc.text("170km/5400m · FTP"+sc.ftp,x+W/2,y+9*f,{align:'center'});y+=hdr;
     sc.cells.forEach(function(r){doc.setFillColor.apply(doc,STBG[r.t]);doc.rect(x,y,W,rowH,'F');if(r.t==='k'){doc.setFillColor(28,94,140);doc.rect(x,y,1.2*f,rowH,'F');}
-      doc.setTextColor(20,20,20);doc.setFont('helvetica','bold');doc.setFontSize(7*f);doc.text(r.km,x+2.3*f,y+3.6*f);
-      if(r.tm){doc.setFont('helvetica','normal');doc.setFontSize(5.4*f);doc.setTextColor(120,120,120);doc.text(r.tm+(r.pass?' · '+r.pass:''),x+W-1.6*f,y+3.6*f,{align:'right'});}
-      doc.setFont('helvetica','normal');doc.setFontSize(5*f);doc.setTextColor(110,110,110);doc.text(pdfSafe(r.nm),x+2.3*f,y+6.2*f);
-      doc.setFont('helvetica','bold');doc.setFontSize(7.5*f);doc.setTextColor.apply(doc,r.t==='k'?[200,28,54]:[200,100,26]);doc.text(r.w,x+2.3*f,y+8.6*f);
-      if(r.rav){doc.setFont('helvetica','normal');doc.setFontSize(5*f);doc.setTextColor(28,110,140);doc.text(pdfSafe(r.rav),x+W-1.6*f,y+8.6*f,{align:'right'});}
+      // ligne 1 : km (gras) + nom du col
+      doc.setTextColor(20,20,20);doc.setFont('helvetica','bold');doc.setFontSize(6.2*f);doc.text(r.km,x+2.3*f,y+3.1*f);
+      var kw=doc.getTextWidth(r.km);doc.setFont('helvetica','normal');doc.text(pdfSafe(r.nm),x+2.3*f+kw+1.4*f,y+3.1*f);
+      // ligne 2 : durée · heure de passage + piège
+      var meta=[];if(r.tm)meta.push(r.tm+(r.pass?' · '+r.pass:''));if(r.warn)meta.push(r.warn);
+      if(meta.length){doc.setFont('helvetica','normal');doc.setFontSize(4.5*f);doc.setTextColor(120,120,120);doc.text(pdfSafe(doc.splitTextToSize(meta.join(' · '),tw)[0]),x+2.3*f,y+5.4*f);}
+      // ligne 3 : ravitos/fontaines à gauche · WATTS (consigne principale, gros + isolé) à droite
+      var big=(r.t==='k'||r.t==='c');
+      doc.setFont('helvetica','bold');doc.setFontSize((big?9:6.5)*f);doc.setTextColor.apply(doc,r.t==='k'?[200,28,54]:(r.t==='f'?[120,120,120]:[200,100,26]));
+      doc.text(r.w,x+W-1.6*f,y+9.3*f,{align:'right'});var cw=doc.getTextWidth(r.w);
+      if(r.rav){doc.setFont('helvetica','normal');doc.setFontSize(4.6*f);doc.setTextColor(28,110,140);doc.text(pdfSafe(doc.splitTextToSize(r.rav,W-cw-5.4*f)[0]),x+2.3*f,y+9.3*f);}
       doc.setDrawColor(210,210,210);doc.line(x,y+rowH,x+W,y+rowH);y+=rowH;});
     doc.setFillColor(17,17,17);doc.rect(x,y,W,foot,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(5.6*f);doc.text(pdfSafe(sc.nutri.l1),x+W/2,y+3.8*f,{align:'center'});doc.setFont('helvetica','normal');doc.setFontSize(5*f);doc.text(pdfSafe(sc.nutri.l2),x+W/2,y+7*f,{align:'center'});doc.setFontSize(4.8*f);doc.setTextColor(240,190,120);doc.text(pdfSafe(t('stSOS')),x+W/2,y+10.6*f,{align:'center'});
     doc.setDrawColor(150,150,150);doc.setLineDashPattern([1,1],0);doc.rect(x,yTop,W,totalH);doc.setLineDashPattern([],0);}
@@ -786,18 +816,24 @@ function drawStickerPortrait(doc,sc){
   doc.setTextColor(120,120,120);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.text(pdfSafe(t('stNoteP')),105,yTop+totalH+9,{align:'center'});}
 function drawStickerLandscape(doc,sc){
   var H=stDim.landscape,n=sc.cells.length,cellW=Math.min(H*0.92,192/n);if(cellW<13)cellW=13;
-  var top=H*0.15,bot=H*0.3,mid=H-top-bot,totalW=cellW*n,x0=(210-totalW)/2;if(x0<9)x0=9;
+  var top=H*0.13,bot=H*0.26,mid=H-top-bot,totalW=cellW*n,x0=(210-totalW)/2;if(x0<9)x0=9;
   var copies=(2*H+16<=250)?2:1;
   function band(y0){
     doc.setFillColor(28,94,140);doc.rect(x0,y0,totalW,top,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(Math.min(top*2.1,7));doc.text("ETAPE DU TOUR · 170km/5400m · FTP"+sc.ftp,x0+totalW/2,y0+top*0.7,{align:'center'});
     var cy=y0+top;
-    sc.cells.forEach(function(r,i){var cx=x0+i*cellW;doc.setFillColor.apply(doc,STBG[r.t]);doc.rect(cx,cy,cellW,mid,'F');if(r.t==='k'){doc.setFillColor(28,94,140);doc.rect(cx,cy,cellW,1.1,'F');}
+    sc.cells.forEach(function(r,i){var cx=x0+i*cellW,ww=cellW-2.8;doc.setFillColor.apply(doc,STBG[r.t]);doc.rect(cx,cy,cellW,mid,'F');if(r.t==='k'){doc.setFillColor(28,94,140);doc.rect(cx,cy,cellW,1.1,'F');}
       var px=cx+1.5;
-      doc.setTextColor(20,20,20);doc.setFont('helvetica','bold');doc.setFontSize(Math.min(H*0.16,5.5));doc.text(r.km,px,cy+mid*0.26);
-      if(r.tm){doc.setFont('helvetica','normal');doc.setFontSize(Math.min(H*0.115,4.2));doc.setTextColor(120,120,120);doc.text(r.tm+(r.pass?' · '+r.pass:''),cx+cellW-1.5,cy+mid*0.26,{align:'right'});}
-      doc.setFont('helvetica','normal');doc.setFontSize(Math.min(H*0.14,4.8));doc.setTextColor(110,110,110);var nm=doc.splitTextToSize(pdfSafe(r.nm),cellW-2.4);doc.text(nm[0],px,cy+mid*0.48);
-      doc.setFont('helvetica','bold');doc.setFontSize(Math.min(H*0.26,9));doc.setTextColor.apply(doc,r.t==='k'?[200,28,54]:[200,100,26]);doc.text(r.w,px,cy+mid*0.76);
-      if(r.rav){doc.setFont('helvetica','normal');doc.setFontSize(Math.min(H*0.12,4.2));doc.setTextColor(28,110,140);var rv=doc.splitTextToSize(pdfSafe(r.rav),cellW-2.4);doc.text(rv[0],px,cy+mid*0.95);}
+      // km + nom du col
+      doc.setTextColor(20,20,20);doc.setFont('helvetica','bold');doc.setFontSize(Math.min(H*0.13,4.9));doc.text(r.km,px,cy+mid*0.16);
+      doc.setFont('helvetica','normal');doc.setFontSize(Math.min(H*0.12,4.6));doc.text(pdfSafe(doc.splitTextToSize(r.nm,ww)[0]),px,cy+mid*0.32);
+      // durée · passage + piège
+      var meta=[];if(r.tm)meta.push(r.tm+(r.pass?' · '+r.pass:''));if(r.warn)meta.push(r.warn);
+      if(meta.length){doc.setFont('helvetica','normal');doc.setFontSize(Math.min(H*0.1,3.9));doc.setTextColor(120,120,120);doc.text(doc.splitTextToSize(meta.join(' · '),ww).slice(0,2).map(pdfSafe),px,cy+mid*0.46);}
+      // ravitos / fontaines
+      if(r.rav){doc.setFont('helvetica','normal');doc.setFontSize(Math.min(H*0.1,3.9));doc.setTextColor(28,110,140);doc.text(doc.splitTextToSize(pdfSafe(r.rav),ww).slice(0,2),px,cy+mid*0.64);}
+      // WATTS : consigne principale, gros + isolé, en bas
+      var big=(r.t==='k'||r.t==='c');
+      doc.setFont('helvetica','bold');doc.setFontSize(Math.min(H*(big?0.24:0.17),big?9.5:6.5));doc.setTextColor.apply(doc,r.t==='k'?[200,28,54]:(r.t==='f'?[120,120,120]:[200,100,26]));doc.text(r.w,px,cy+mid*0.93);
       doc.setDrawColor(255,255,255);doc.setLineWidth(0.3);doc.line(cx+cellW,cy,cx+cellW,cy+mid);doc.setLineWidth(0.2);});
     var by=cy+mid;doc.setFillColor(17,17,17);doc.rect(x0,by,totalW,bot,'F');doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(Math.min(bot*0.9,6));doc.text(pdfSafe(sc.nutri.l1+"    ·    "+sc.nutri.l2),x0+totalW/2,by+bot*0.42,{align:'center'});doc.setFont('helvetica','normal');doc.setFontSize(Math.min(bot*0.8,5.4));doc.setTextColor(240,190,120);doc.text(pdfSafe(t('stSOS')),x0+totalW/2,by+bot*0.82,{align:'center'});
     doc.setDrawColor(150,150,150);doc.setLineDashPattern([1,1],0);doc.rect(x0,y0,totalW,H);doc.setLineDashPattern([],0);}
@@ -806,14 +842,21 @@ function drawStickerLandscape(doc,sc){
 function generateStickerPDF(){var jsPDF=window.jspdf.jsPDF,doc=new jsPDF({unit:'mm',format:'a4'}),sc=stickerCells();
   if(stOrient==='portrait')drawStickerPortrait(doc,sc);else drawStickerLandscape(doc,sc);
   dl(doc.output('blob'),'sas-to-summit-sticker.pdf');}
+function metaHtml(r){var m=[];if(r.tm)m.push(r.tm+(r.pass?' · '+r.pass:''));if(r.warn)m.push('<span class="warn">'+r.warn+'</span>');return m.join(' · ');}
 function buildStickerPreview(){var sc=stickerCells(),box=document.getElementById('stickerContent');
   if(stOrient==='portrait'){
     var one='<div class="tt"><div class="h"><b>ÉTAPE DU TOUR</b><small>170km/5400m · FTP'+sc.ftp+'</small></div>'+
-      sc.cells.map(function(r){return '<div class="r '+r.t+'"><div><span class="km">'+r.km+'</span>'+(r.tm?' <span class="tm">'+r.tm+(r.pass?' · '+r.pass:'')+'</span>':'')+' <span class="nm">'+r.nm+'</span> '+(r.rav?'<span class="rav">'+r.rav+'</span>':'')+'</div><div class="w">'+r.w+'</div></div>';}).join('')+
+      sc.cells.map(function(r){var meta=metaHtml(r);return '<div class="r '+r.t+'">'+
+        '<div class="rhead"><span class="km">'+r.km+'</span> <span class="nm">'+r.nm+'</span></div>'+
+        (meta?'<div class="meta">'+meta+'</div>':'')+
+        '<div class="rbot">'+(r.rav?'<span class="rav">'+r.rav+'</span>':'')+'<span class="w">'+r.w+'</span></div></div>';}).join('')+
       '<div class="foot2">'+sc.nutri.l1+'<br>'+sc.nutri.l2+'<br><span class="sos">'+t('stSOS')+'</span></div></div>';
     box.innerHTML=one+one;
   }else{
-    var cells=sc.cells.map(function(r){return '<div class="c '+r.t+'"><div class="km">'+r.km+(r.tm?' <span class="tm">'+r.tm+(r.pass?' · '+r.pass:'')+'</span>':'')+'</div><div class="nm">'+r.nm+'</div><div class="w">'+r.w+'</div>'+(r.rav?'<div class="rav">'+r.rav+'</div>':'')+'</div>';}).join('');
+    var cells=sc.cells.map(function(r){var meta=metaHtml(r);return '<div class="c '+r.t+'">'+
+      '<div class="km">'+r.km+'</div><div class="nm">'+r.nm+'</div>'+
+      (meta?'<div class="meta">'+meta+'</div>':'')+
+      (r.rav?'<div class="rav">'+r.rav+'</div>':'')+'<div class="w">'+r.w+'</div></div>';}).join('');
     box.innerHTML='<div class="ttl"><div class="hh"><b>ÉTAPE DU TOUR</b> · 170km/5400m · FTP'+sc.ftp+'</div><div class="lrow">'+cells+'</div><div class="foot2">'+sc.nutri.l1+' · '+sc.nutri.l2+'<br><span class="sos">'+t('stSOS')+'</span></div></div>';
   }}
 function stSyncControls(){var isP=stOrient==='portrait';

@@ -2,7 +2,8 @@
 import { S, uid } from './state.js';
 import { llAtKm, nearestKm, hav } from './gpx.js';
 
-const ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+const ENDPOINTS = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass-api.de/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+const PHOTON = 'https://photon.komoot.io/reverse';
 // 7-day localStorage cache keyed by query text: the same track is never queried twice
 const CACHE_TTL = 7 * 86400000;
 function qkey(q) { let h = 2166136261; for (let i = 0; i < q.length; i++) { h ^= q.charCodeAt(i); h = Math.imul(h, 16777619); } return 'allure-ov-' + (h >>> 0).toString(36); }
@@ -25,9 +26,33 @@ function overpass(query) {
 }
 const PRIO = n => n.tags.mountain_pass === 'yes' || n.tags.natural === 'saddle' ? 0 : (n.tags.natural === 'peak' ? 1 : 2);
 
-// Names unnamed climbs: passes/saddles within 600 m, else peaks/places within 1 km of the summit. Returns count named.
+// Names unnamed climbs. Primary: Photon reverse geocoding (one request per summit, cached);
+// fallback: Overpass. Passes/saddles within 600 m, else peaks/places within 1 km.
 const MAXD = { 0: 600, 1: 1000, 2: 1000 };
+const prioTag = (k, v) => (k === 'mountain_pass' || (k === 'natural' && v === 'saddle')) ? 0 : (k === 'natural' && v === 'peak' ? 1 : 2);
+function photonName(p) {
+  const url = PHOTON + '?lat=' + p.lat.toFixed(5) + '&lon=' + p.lon.toFixed(5) + '&radius=1&limit=8&lang=fr' +
+    ['mountain_pass:yes', 'natural:saddle', 'natural:peak', 'place:village', 'place:hamlet', 'place:locality', 'place:isolated_dwelling'].map(t => '&osm_tag=' + t).join('');
+  const hit = cacheGet(url); if (hit) return Promise.resolve(hit);
+  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 10000);
+  return fetch(url, { signal: ctl.signal }).then(r => { clearTimeout(tm); if (!r.ok) throw new Error('http ' + r.status); return r.json(); }).then(j => {
+    let best = null, bk = Infinity;
+    (j.features || []).forEach(f => { const pr = f.properties || {}, c = f.geometry && f.geometry.coordinates; if (!pr.name || !c) return;
+      const d = hav(p.lat, p.lon, c[1], c[0]), k0 = prioTag(pr.osm_key, pr.osm_value); if (d > MAXD[k0]) return; const k = k0 * 1000 + d; if (k < bk) { bk = k; best = pr.name; } });
+    const res = { name: best || '' }; cacheSet(url, res); return res;
+  });
+}
 export function nameClimbsFromOSM(race, D) {
+  const climbs = race.segments.filter(s => s.type === 'climb' && !s.name);
+  if (!climbs.length) return Promise.resolve(0);
+  const pts = climbs.map(s => llAtKm(race, D, s.to));
+  let named = 0, failed = false;
+  const step = i => { if (i >= climbs.length) return Promise.resolve();
+    return photonName(pts[i]).then(r => { if (r.name) { climbs[i].name = r.name; named++; } }).catch(() => { failed = true; })
+      .then(() => failed ? null : new Promise(res => setTimeout(res, 250)).then(() => step(i + 1))); };
+  return step(0).then(() => failed ? nameClimbsOverpass(race, D).then(n => named + n) : named);
+}
+function nameClimbsOverpass(race, D) {
   const climbs = race.segments.filter(s => s.type === 'climb' && !s.name);
   if (!climbs.length) return Promise.resolve(0);
   const pts = climbs.map(s => llAtKm(race, D, s.to));

@@ -341,3 +341,7 @@ details.adv .sliders{margin-top:14px}
 
 .advmodel{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
 .advmodel .hint{margin-top:8px;line-height:1.45}
+.nsel.lv{flex-wrap:wrap}
+.nsel.lv button{flex:1 1 120px}
+.nsel.lv button small{display:block;font-weight:400;font-size:.68rem;opacity:.7;margin-top:2px}
+@media(max-width:560px){.nsel.lv button{flex:1 1 40%}}

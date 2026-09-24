@@ -6,7 +6,7 @@ export const S = {
   D: null,           // derived from race.track: {cum, profile, totalKm, dplus, hasEle}
   settings: {
     ftp: 250, kg: 75, bikeKg: 8, obj: 'diesel', advIF: 0.75,
-    flatIF: 0.62, draft: 0.20, descentCapKmh: 48,
+    flatIF: 0.62, draft: 0.20, descentCapKmh: 48, draftLevel: 'groupe', descLevel: 'standard',
     seg: { minGrad: 2.5, minKm: 1.5, dipKm: 2.5 },
     showFountains: false,
     nut: { gph: 75, gGel: 45, gBidon: 40, bsize: 0.6, isoPct: 50, ravito: 'ravitos' }

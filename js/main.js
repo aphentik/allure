@@ -1,7 +1,7 @@
 import { S, on, emit, loadPrefs, savePrefs, loadRace, saveRace, clearRace } from './state.js';
 import { t, fmtn, fmtDate, STR } from './i18n.js';
 import { buildTrack } from './gpx.js';
-import { assignCodes, computeSegc } from './physics.js';
+import { assignCodes, computeSegc, DESC_LEVELS, DRAFT_LEVELS } from './physics.js';
 import { compute } from './plan.js';
 import { nutSync, computeNutrition } from './nutrition.js';
 import { fetchWeather, renderWeather, buildWxPoints } from './weather.js';
@@ -48,10 +48,16 @@ function syncInputs() {
   $('advWrap').style.display = st.obj === 'adv' ? '' : 'none';
   $('advRange').value = Math.round(st.advIF * 100); updateAdv();
   $('flatIF').value = Math.round(st.flatIF * 100); $('flatIFV').textContent = Math.round(st.flatIF * 100);
-  $('draft').value = Math.round(st.draft * 100); $('draftV').textContent = Math.round(st.draft * 100);
-  $('descCap').value = st.descentCapKmh; $('descCapV').textContent = st.descentCapKmh;
+  syncLevels();
   $('profFount').setAttribute('aria-pressed', st.showFountains); $('gxFount').setAttribute('aria-pressed', st.showFountains);
   nutSync();
+}
+function syncLevels() {
+  const st = S.settings;
+  document.querySelectorAll('#draftSel button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.dr === st.draftLevel); b.innerHTML = t('dr_' + b.dataset.dr) + '<small>' + t('dr_' + b.dataset.dr + '_h') + '</small>'; });
+  document.querySelectorAll('#descSel button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.dl === st.descLevel); b.innerHTML = t('dl_' + b.dataset.dl) + ' · ' + DESC_LEVELS[b.dataset.dl] + ' km/h<small>' + t('dl_' + b.dataset.dl + '_h') + '</small>'; });
+  $('draftHint').textContent = fmtn(t('draftHint'), { pct: Math.round((DRAFT_LEVELS[st.draftLevel] || 0) * 100) });
+  $('descHint').textContent = fmtn(t('descHint'), { cap: DESC_LEVELS[st.descLevel] || 48 });
 }
 function updateAdv() {
   const r = $('advRange'), v = +r.value; $('advVal').textContent = v;
@@ -68,7 +74,7 @@ function showTab(w) {
 // ---- language / static texts ----
 function applyLang() {
   document.documentElement.setAttribute('lang', S.lang);
-  ['eyebrow', 'profcap', 'dataTitle', 'labFtp', 'labKg', 'labStart', 'goalTitle', 'o1', 'o1s', 'o2', 'o2s', 'o3', 'o3s', 'o4', 'o4s', 'advLabel', 'advUnit', 'advMore', 'labFlatIF', 'flatHint', 'labDraft', 'draftHint', 'labDescCap', 'descHint',
+  ['eyebrow', 'profcap', 'dataTitle', 'labFtp', 'labKg', 'labStart', 'goalTitle', 'o1', 'o1s', 'o2', 'o2s', 'o3', 'o3s', 'o4', 'o4s', 'advLabel', 'advUnit', 'advMore', 'labFlatIF', 'flatHint', 'labDraft', 'labDescCap', 'modelNote',
     'nutTitle', 'labGph', 'labGel', 'labBidon', 'labBsize', 'nutIsoTitle', 'nutIsoLab', 'nutRvTitle', 'rv1', 'rv2', 'nutRatesT', 'nutCarryT', 'nutPlanT',
     'mTitle', 'mHint', 'soP', 'soL', 'gxTitle', 'gxAutre', 'gxHint', 'wxTitle', 'wxDetail',
     'tabPlan', 'tabNutri', 'tabWx', 'tabCheck', 'chkTitle', 'chkIntro', 'chkReset', 'emptyTitle', 'emptyText', 'cfgTitle'].forEach(id => setText(id, id));
@@ -115,8 +121,8 @@ function wire() {
   $('obj').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.settings.obj = b.dataset.o; savePrefs(); syncInputs(); compute(); });
   $('advRange').addEventListener('input', () => { S.settings.advIF = (+$('advRange').value) / 100; updateAdv(); savePrefs(); compute(); });
   $('flatIF').addEventListener('input', () => { S.settings.flatIF = (+$('flatIF').value) / 100; $('flatIFV').textContent = $('flatIF').value; savePrefs(); compute(); });
-  $('draft').addEventListener('input', () => { S.settings.draft = (+$('draft').value) / 100; $('draftV').textContent = $('draft').value; savePrefs(); compute(); });
-  $('descCap').addEventListener('input', () => { S.settings.descentCapKmh = +$('descCap').value; $('descCapV').textContent = $('descCap').value; savePrefs(); compute(); });
+  $('draftSel').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.settings.draftLevel = b.dataset.dr; savePrefs(); syncLevels(); compute(); });
+  $('descSel').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.settings.descLevel = b.dataset.dl; savePrefs(); syncLevels(); compute(); });
   ['gph', 'gGel', 'gBidon', 'bsize'].forEach(id => $(id).addEventListener('input', () => { S.settings.nut[id] = +$(id).value || S.settings.nut[id]; savePrefs(); computeNutrition(); }));
   $('isoPct').addEventListener('input', function () { S.settings.nut.isoPct = +this.value; savePrefs(); nutSync(); computeNutrition(); });
   $('nutRv').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.settings.nut.ravito = b.dataset.rv; savePrefs(); nutSync(); computeNutrition(); });
@@ -149,6 +155,8 @@ function wire() {
 (function boot() {
   if (location.protocol === 'file:') { $('fileBanner').style.display = ''; }
   loadPrefs();
+  if (!DESC_LEVELS[S.settings.descLevel]) { const c = S.settings.descentCapKmh || 48; S.settings.descLevel = c < 44 ? 'prudent' : c < 52 ? 'standard' : c < 59 ? 'confirme' : 'expert'; }
+  if (DRAFT_LEVELS[S.settings.draftLevel] == null) { const d = S.settings.draft || 0.2; S.settings.draftLevel = d < 0.1 ? 'seul' : d < 0.3 ? 'groupe' : 'peloton'; }
   document.documentElement.setAttribute('data-theme', S.theme);
   wire(); initProfile(); initMap(); initEditor(setRace); checkVersion();
   const qs = new URLSearchParams(location.search);

@@ -61,8 +61,9 @@ Lien profond : `index.html?gpx=<url-du-gpx>` charge directement une trace (même
 ## Modèle
 
 - Montées : vitesse résolue depuis la puissance cible (FTP × intensité), masse coureur + vélo, pente moyenne, CdA 0,34, Crr 0,005.
-- Plat : FTP × `flatIF` (62 % par défaut), CdA réduit par l'abri (`draft`).
-- Descente : 30 % FTP en roue libre, plafonné par `descentCapKmh` (technicité). Le temps est intégré tous les 100 m sur le profil réel.
+- Plat : FTP × `flatIF`, CdA réduit par l'abri (`draftLevel` : seul 0 %, petit groupe 20 %, peloton 40 %).
+- Descente : 30 % FTP en roue libre, plafonné selon `descLevel` (prudent 40, standard 48, confirmé 55, expert 62 km/h). Le temps est intégré tous les 100 m sur le profil réel.
+- Ces trois réglages ne sont libres qu'en objectif « Avancé » ; les autres objectifs utilisent des présélections (Finir tranquille 58 % · prudent, Gérer l'effort 62 % · standard, Performer 66 % · confirmé).
 - OpenStreetMap : à l'import, noms des cols via Photon (reverse geocoding komoot : cols et selles à moins de 600 m, sinon sommets et lieux à moins d'1 km ; repli Overpass), et points d'eau potable via Overpass (`amenity=drinking_water`, robinets, sources potables) à moins de 80 m de la trace. Serveurs Overpass : OSM France, overpass-api.de, mail.ru. Réponses mises en cache 7 jours dans le navigateur. Bouton « Actualiser depuis OpenStreetMap » dans ⚙ Configurer.
 - Météo : Open‑Meteo, prévisions ≤ 16 jours. Vent échantillonné tous les ~5–8 km, comparé au cap du coureur à l'heure de passage.
 

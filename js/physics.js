@@ -14,6 +14,15 @@ export function solveSpeed(power, mass, gradPct, opt) {
   return (lo + hi) / 2;
 }
 export const BASE = { chill: 0.68, diesel: 0.75, perf: 0.80 };
+export const DESC_LEVELS = { prudent: 40, standard: 48, confirme: 55, expert: 62 };
+export const DRAFT_LEVELS = { seul: 0, groupe: 0.20, peloton: 0.40 };
+// flat / descent model presets per objective; 'adv' uses the user's own settings
+const PRESETS = { chill: { flatIF: 0.58, draft: 0.20, descentCapKmh: 40 }, diesel: { flatIF: 0.62, draft: 0.20, descentCapKmh: 48 }, perf: { flatIF: 0.66, draft: 0.20, descentCapKmh: 55 } };
+export function modelParams() {
+  const s = S.settings;
+  if (s.obj !== 'adv') return PRESETS[s.obj] || PRESETS.diesel;
+  return { flatIF: s.flatIF, draft: DRAFT_LEVELS[s.draftLevel] != null ? DRAFT_LEVELS[s.draftLevel] : s.draft, descentCapKmh: DESC_LEVELS[s.descLevel] || s.descentCapKmh || 48 };
+}
 export function baseIntensity() { const s = S.settings; return s.obj === 'adv' ? s.advIF : (BASE[s.obj] || BASE.diesel); }
 export function ftpVal() { return Math.max(60, +S.settings.ftp || 0); }
 export function kgVal() { return Math.max(35, +S.settings.kg || 0); }
@@ -29,7 +38,7 @@ function stepSpeed(grad, ftp, mass, st) {
 
 // Enriched segments: spd (m/s), tSec, w, pct, ravitos, barrier, warn
 export function computeSegc(race, D) {
-  const st = S.settings, ftp = ftpVal(), kg = kgVal(), mass = kg + (st.bikeKg || 8), base = baseIntensity();
+  const st = modelParams(), ftp = ftpVal(), kg = kgVal(), mass = kg + (S.settings.bikeKg || 8), base = baseIntensity();
   const wps = race.waypoints || [];
   return race.segments.map(s => {
     const len = s.to - s.from; let spd, w = null, pct = null;

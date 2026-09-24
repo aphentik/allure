@@ -25,10 +25,11 @@
   <h1>Allure</h1>
   <div class="event" id="event"></div>
   <div class="route" id="route"></div>
+  <div class="hdr-actions" id="hdrActions" style="display:none"><button class="actbtn cfgbtn" id="cfgBtn"></button></div>
   <div class="banner" id="fileBanner" style="display:none" data-i18n="fileHint">Ouvre cette page via un serveur web (ex. <code>python3 -m http.server</code>) : les modules ne se chargent pas depuis un fichier local.</div>
 
   <div class="profile" id="profile" style="display:none"><div class="prof-cap" id="profcap"></div>
-    <div class="prof-ctrls"><button class="prof-tog" id="profMap"></button><button class="prof-tog" id="profFount"></button></div>
+    <div class="prof-ctrls"><button class="prof-tog" id="profFount"></button></div>
     <div class="prof-plot" id="profPlot">
     <svg viewBox="0 0 1000 320" preserveAspectRatio="none" role="img" aria-label="profil" id="profSvg"></svg>
     <div class="prof-cross" id="profCross"></div><div class="prof-dot" id="profDot"></div><div class="prof-tip" id="profTip"></div>
@@ -44,9 +45,9 @@
     <div id="wxSumBody"></div>
   </div>
 
-  <div class="empty" id="viewEmpty" style="display:none"><div id="emptyDrop"><h2 id="emptyTitle"></h2><p id="emptyText"></p><button class="actbtn prim" id="emptyBtn"></button></div></div>
+  <div class="empty" id="viewEmpty" style="display:none"><h2 id="emptyTitle"></h2><p id="emptyText"></p><div id="emptyZone"></div></div>
 
-  <div class="tabs"><button class="tab" data-tab="plan" aria-pressed="true" id="tabPlan"></button><button class="tab" data-tab="nutri" id="tabNutri"></button><button class="tab" data-tab="weather" id="tabWx"></button><button class="tab" data-tab="race" id="tabRace"></button><button class="tab" data-tab="check" id="tabCheck"></button></div>
+  <div class="tabs"><button class="tab" data-tab="plan" aria-pressed="true" id="tabPlan"></button><button class="tab" data-tab="nutri" id="tabNutri"></button><button class="tab" data-tab="weather" id="tabWx"></button><button class="tab" data-tab="check" id="tabCheck"></button></div>
 
   <div id="viewPlan">
   <div class="panel">
@@ -116,7 +117,6 @@
       <div class="wxgrid" id="wxGrid"></div>
     </div>
   </div>
-  <div id="viewRace" style="display:none"><div id="raceBody"></div></div>
   <div id="viewCheck" style="display:none">
     <div class="panel"><div class="panel-title" id="chkTitle"></div><div class="nutri-sub" id="chkIntro"></div><div id="chkList"></div><div style="margin-top:16px"><button class="actbtn" id="chkReset"></button></div></div>
   </div>
@@ -127,6 +127,7 @@
     <button class="actbtn prim" id="pdfBtn"></button>
     <button class="actbtn" id="stickerBtn"></button>
     <button class="actbtn" id="gpxBtn"></button>
+    <button class="actbtn" id="cfgBtn2"></button>
   </div>
 </div>
 
@@ -139,6 +140,12 @@
   </div>
   <div class="sticker-print" id="stickerContent"></div>
   <div style="text-align:center;margin-top:14px"><button class="actbtn prim" id="stickerPdfBtn"></button></div>
+</div></div>
+
+<div class="modal" id="cfgModal"><div class="sheet wide dark">
+  <button class="close" id="cfgClose"></button>
+  <h3 id="cfgTitle"></h3>
+  <div id="cfgBody"></div>
 </div></div>
 
 <div class="modal" id="gpxModal"><div class="sheet">

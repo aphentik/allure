@@ -42,7 +42,8 @@ function clearHover() { if (hoverMarker && map && map.hasLayer(hoverMarker)) map
 function icon(html, cls, size) { return L.divIcon({ html, className: 'mi ' + (cls || ''), iconSize: [size || 22, size || 22], iconAnchor: [(size || 22) / 2, (size || 22) / 2] }); }
 
 export function buildMap() {
-  if (!S.ui.showMap || !S.race || !ensureMap()) return;
+  const w = document.getElementById('mapWrap'); if (w) w.style.display = S.race ? '' : 'none';
+  if (!S.race || !ensureMap()) return;
   const race = S.race, D = S.D, pts = race.track.pts, cum = D.cum;
   layers.track.clearLayers(); layers.marks.clearLayers();
   const stride = Math.max(1, Math.floor(pts.length / 4000));
@@ -78,7 +79,7 @@ export function buildWind() {
   layers.wind.clearLayers();
   const leg = document.getElementById('mapLegend');
   const ws = windSeries();
-  if (!ws || !ws.length) { if (leg) leg.innerHTML = S.wx.error || (S.wx.status && S.wx.status !== 'ok') ? '<span class="lg-muted">' + t('windNoData') + '</span>' : ''; return; }
+  if (!ws || !ws.length) { if (leg) leg.innerHTML = '<span class="lg-muted">' + t(S.wx.status === 'nodate' || S.wx.status === 'toofar' ? 'windNoDate' : 'windNoData') + '</span>'; return; }
   ws.forEach(w => {
     const len = 14 + Math.max(0, Math.min(1, (w.wind - 5) / 35)) * 22, sw = 2 + Math.max(0, Math.min(1, (w.wind - 5) / 35)) * 2, col = WCOL[w.cls], rot = (w.wdir + 180) % 360;
     const html = '<div class="warrow" style="transform:rotate(' + rot.toFixed(0) + 'deg)"><svg width="44" height="44" viewBox="-22 -22 44 44"><line x1="0" y1="' + (len / 2).toFixed(1) + '" x2="0" y2="' + (-len / 2).toFixed(1) + '" stroke="' + col + '" stroke-width="' + sw.toFixed(1) + '" stroke-linecap="round"/><path d="M0,' + (-len / 2).toFixed(1) + ' l-5,7 M0,' + (-len / 2).toFixed(1) + ' l5,7" stroke="' + col + '" stroke-width="' + sw.toFixed(1) + '" fill="none" stroke-linecap="round"/></svg></div><div class="wlab" style="color:' + col + '">' + Math.round(w.wind) + '</div>';
@@ -88,18 +89,10 @@ export function buildWind() {
   });
   if (leg) leg.innerHTML = '<span><i style="background:' + WCOL.head + '"></i>' + t('windHead') + '</span><span><i style="background:' + WCOL.cross + '"></i>' + t('windCross') + '</span><span><i style="background:' + WCOL.tail + '"></i>' + t('windTail') + '</span><span class="lg-muted">' + t('windLegend') + '</span>';
 }
-export function showMap(v) {
-  S.ui.showMap = v; savePrefs();
-  const w = document.getElementById('mapWrap'), b = document.getElementById('profMap');
-  if (w) w.style.display = v ? '' : 'none'; if (b) b.setAttribute('aria-pressed', v);
-  if (v) buildMap();
-}
 export function initMap() {
   on('hover-km', d => { if (!map || d.src !== 'profile') return; if (d.km == null) clearHover(); else setHover(d.km); });
   on('wx', buildWind);
   on('wind-toggle', buildWind);
-  const b = document.getElementById('profMap'); if (b) b.addEventListener('click', () => showMap(!S.ui.showMap));
-  if (S.ui.showMap) showMap(true);
   window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 }
 export function relabelMap() { if (!map) return; const c = document.querySelector('.mapctl'); if (c) { c.querySelector('[data-base=topo]').textContent = t('mapTopo'); c.querySelector('[data-base=osm]').textContent = t('mapOsm'); c.querySelector('[data-wind]').textContent = t('windBtn'); } buildMap(); }

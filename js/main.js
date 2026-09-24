@@ -6,10 +6,10 @@ import { compute } from './plan.js';
 import { nutSync, computeNutrition } from './nutrition.js';
 import { fetchWeather, renderWeather, buildWxPoints } from './weather.js';
 import { buildProfile, initProfile } from './profile.js';
-import { initMap, buildMap, relabelMap, showMap } from './map.js';
+import { initMap, buildMap, relabelMap } from './map.js';
 import { renderChecklist, resetChecklist } from './checklist.js';
 import { generatePlanPDF, generateStickerPDF, buildStickerPreview, stSyncControls, generateExport, gxSync, busy, routeText } from './export.js';
-import { renderRaceTab, initEditor, handleFile } from './editor.js';
+import { renderConfig, renderEmpty, initEditor, handleFile, runOSM } from './editor.js';
 
 const $ = id => document.getElementById(id);
 function setText(id, k) { const e = $(id); if (e) e.textContent = t(k); }
@@ -19,14 +19,16 @@ function setRace(race, D) {
   S.race = race; S.D = D || buildTrack(race.track.pts);
   assignCodes(S.race, S.D);
   saveRace();
-  renderAll(); fetchWeather(); showTab('plan');
+  renderAll(); fetchWeather(); showTab('plan'); openConfig(); runOSM();
 }
+function openConfig() { if (!S.race) return; renderConfig(); $('cfgModal').classList.add('open'); }
+function closeModals() { document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open')); }
 function renderAll() {
   const has = !!S.race;
   $('viewEmpty').style.display = has ? 'none' : '';
-  ['profile', 'wxSumPanel', 'actionBar'].forEach(id => { $(id).style.display = has ? '' : 'none'; });
-  document.querySelectorAll('.tab[data-tab]').forEach(b => { if (b.dataset.tab !== 'race' && b.dataset.tab !== 'check') b.style.display = has ? '' : 'none'; });
-  renderHeader(); renderRaceTab();
+  ['profile', 'wxSumPanel', 'actionBar', 'hdrActions'].forEach(id => { $(id).style.display = has ? '' : 'none'; });
+  document.querySelectorAll('.tab[data-tab]').forEach(b => { if (b.dataset.tab !== 'check') b.style.display = has ? '' : 'none'; });
+  renderHeader(); renderConfig(); if (!has) { renderEmpty(); $('mapWrap').style.display = 'none'; }
   if (!has) return;
   syncInputs(); buildProfile(); compute(); buildMap();
 }
@@ -48,7 +50,6 @@ function syncInputs() {
   $('draft').value = Math.round(st.draft * 100); $('draftV').textContent = Math.round(st.draft * 100);
   $('descCap').value = st.descentCapKmh; $('descCapV').textContent = st.descentCapKmh;
   $('profFount').setAttribute('aria-pressed', st.showFountains); $('gxFount').setAttribute('aria-pressed', st.showFountains);
-  $('profMap').setAttribute('aria-pressed', S.ui.showMap);
   nutSync();
 }
 function updateAdv() {
@@ -59,7 +60,7 @@ function updateAdv() {
 }
 function showTab(w) {
   S.ui.tab = w; savePrefs();
-  ['plan', 'nutri', 'weather', 'check', 'race'].forEach(k => { const v = $('view' + k[0].toUpperCase() + k.slice(1)); if (v) v.style.display = w === k ? '' : 'none'; });
+  ['plan', 'nutri', 'weather', 'check'].forEach(k => { const v = $('view' + k[0].toUpperCase() + k.slice(1)); if (v) v.style.display = w === k ? '' : 'none'; });
   document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-pressed', x.dataset.tab === w));
 }
 
@@ -69,9 +70,9 @@ function applyLang() {
   ['eyebrow', 'profcap', 'dataTitle', 'labFtp', 'labKg', 'labStart', 'goalTitle', 'o1', 'o1s', 'o2', 'o2s', 'o3', 'o3s', 'o4', 'o4s', 'advLabel', 'advUnit', 'advMore', 'labFlatIF', 'labDraft', 'labDescCap', 'draftHint',
     'nutTitle', 'labGph', 'labGel', 'labBidon', 'labBsize', 'nutIsoTitle', 'nutIsoLab', 'nutRvTitle', 'rv1', 'rv2', 'nutRatesT', 'nutCarryT', 'nutPlanT',
     'mTitle', 'mHint', 'soP', 'soL', 'gxTitle', 'gxAutre', 'gxHint', 'wxTitle', 'wxDetail',
-    'tabPlan', 'tabNutri', 'tabWx', 'tabCheck', 'tabRace', 'chkTitle', 'chkIntro', 'chkReset', 'emptyTitle', 'emptyText', 'emptyBtn'].forEach(id => setText(id, id));
+    'tabPlan', 'tabNutri', 'tabWx', 'tabCheck', 'chkTitle', 'chkIntro', 'chkReset', 'emptyTitle', 'emptyText', 'cfgTitle'].forEach(id => setText(id, id));
   setText('pdfBtn', 'btnPdf'); setText('stickerBtn', 'btnSticker'); setText('stickerPdfBtn', 'mDl'); setText('mClose', 'mClose'); setText('gxClose', 'mClose'); setText('gpxBtn', 'gpxBtn');
-  setText('profFount', 'gxFountBtn'); setText('gxFountInc', 'gxFountInc'); $('gxFount').textContent = t('gxFountInc'); setText('profMap', 'mapBtn');
+  setText('profFount', 'gxFountBtn'); setText('gxFountInc', 'gxFountInc'); $('gxFount').textContent = t('gxFountInc'); setText('cfgBtn', 'cfgBtn'); setText('cfgBtn2', 'cfgBtn'); setText('cfgClose', 'mClose');
   $('wxRefresh').textContent = t('wxRefresh'); $('wxSumRefresh').textContent = t('wxRefresh'); $('wxSumDetail').textContent = t('wxDetail');
   $('sodium').innerHTML = t('sodium');
   $('foot').innerHTML = fmtn(t('foot'), { bike: S.settings.bikeKg });
@@ -89,12 +90,11 @@ function wire() {
   document.querySelectorAll('.langsel button').forEach(b => b.addEventListener('click', () => { S.lang = b.dataset.l; applyLang(); }));
   $('themeBtn').addEventListener('click', () => applyTheme(S.theme === 'light' ? 'dark' : 'light'));
   document.querySelectorAll('.tab').forEach(tb => tb.addEventListener('click', () => showTab(tb.dataset.tab)));
-  $('emptyBtn').addEventListener('click', () => { showTab('race'); const fi = $('fileInp'); if (fi) fi.click(); });
-  $('emptyDrop').addEventListener('dragover', e => { e.preventDefault(); $('emptyDrop').classList.add('over'); });
-  $('emptyDrop').addEventListener('dragleave', () => $('emptyDrop').classList.remove('over'));
-  $('emptyDrop').addEventListener('drop', e => { e.preventDefault(); $('emptyDrop').classList.remove('over'); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) { showTab('race'); handleFile(f, setRace); } });
+  $('cfgBtn').addEventListener('click', openConfig); $('cfgBtn2').addEventListener('click', openConfig);
+  $('cfgClose').addEventListener('click', () => $('cfgModal').classList.remove('open'));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
   ['ftp', 'kg'].forEach(id => $(id).addEventListener('input', () => { S.settings[id] = +$(id).value || S.settings[id]; savePrefs(); compute(); }));
-  $('start').addEventListener('change', () => { if (!S.race) return; S.race.start = $('start').value || '07:00'; saveRace(); compute(); renderRaceTab(); });
+  $('start').addEventListener('change', () => { if (!S.race) return; S.race.start = $('start').value || '07:00'; saveRace(); compute(); renderConfig(); });
   $('obj').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.settings.obj = b.dataset.o; savePrefs(); syncInputs(); compute(); });
   $('advRange').addEventListener('input', () => { S.settings.advIF = (+$('advRange').value) / 100; updateAdv(); savePrefs(); compute(); });
   $('flatIF').addEventListener('input', () => { S.settings.flatIF = (+$('flatIF').value) / 100; $('flatIFV').textContent = $('flatIF').value; savePrefs(); compute(); });
@@ -125,7 +125,7 @@ function wire() {
     if (d && d.structural && S.wx.data) { const np = buildWxPoints(S.race, S.D), old = S.wx.pts.slice(0, S.wx.nWx); const same = np.length === old.length && np.every((p, i) => Math.abs(p.km - old[i].km) < 0.05);
       if (same) { np.forEach((p, i) => { old[i].name = p.name; old[i].key = p.key; }); renderWeather(); } else { clearTimeout(wxTimer); wxTimer = setTimeout(fetchWeather, 1500); } } });
   on('race-date', () => { $('wxSub').innerHTML = fmtn(t('wxSub'), { date: fmtDate(S.race.date) }); $('wxSumTitle').textContent = fmtn(t('wxSumTitle'), { date: fmtDate(S.race.date) }); fetchWeather(); });
-  on('race-reset', () => { clearRace().then(() => { S.race = null; S.D = null; S.wx.data = null; renderAll(); renderWeather(); showTab('race'); }); });
+  on('race-reset', () => { clearRace().then(() => { S.race = null; S.D = null; S.wx.data = null; closeModals(); renderAll(); renderWeather(); showTab('plan'); }); });
 }
 
 // ---- boot ----
@@ -139,11 +139,11 @@ function wire() {
     window.addEventListener('error', e => log('ERR ' + e.message + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno)); window.addEventListener('unhandledrejection', e => log('REJ ' + (e.reason && e.reason.stack || e.reason))); window.__log = log; }
   const deep = qs.get('gpx') || qs.get('race');
   loadRace().then(r => {
-    if (deep) return fetch(deep).then(x => { if (!x.ok) throw new Error('http ' + x.status); return x.text(); }).then(txt => { applyLang(); showTab('race'); return handleFile(new File([txt], deep.split('/').pop() || 'course.gpx'), setRace); })
-      .catch(e => { console.error(e); applyLang(); showTab('race'); const st = $('rcStatus'); if (st) { st.textContent = t('rcErrParse') + ' (' + deep + ')'; st.className = 'rc-status err'; } });
+    if (deep) return fetch(deep).then(x => { if (!x.ok) throw new Error('http ' + x.status); return x.text(); }).then(txt => { applyLang(); return handleFile(new File([txt], deep.split('/').pop() || 'course.gpx'), setRace); })
+      .catch(e => { console.error(e); applyLang(); const st = $('rcStatus'); if (st) { st.textContent = t('rcErrParse') + ' (' + deep + ')'; st.className = 'rc-status err'; } });
     if (r && r.track && r.track.pts && r.track.pts.length) { S.race = r; S.D = buildTrack(r.track.pts); assignCodes(S.race, S.D); }
     applyLang();
     if (S.race) { fetchWeather(); showTab(S.ui.tab && S.ui.tab !== 'race' ? S.ui.tab : 'plan'); }
-    else { renderWeather(); showTab('race'); }
+    else { renderWeather(); showTab('plan'); }
   });
 })();

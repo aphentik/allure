@@ -11,7 +11,7 @@ export const S = {
     showFountains: false,
     nut: { gph: 75, gGel: 45, gBidon: 40, bsize: 0.6, isoPct: 50, ravito: 'ravitos' }
   },
-  ui: { tab: 'plan', stOrient: 'portrait', stDim: { portrait: 38, landscape: 28 }, gxDev: 'coros', showMap: false, showWind: true, baseLayer: 'topo' },
+  ui: { tab: 'plan', stOrient: 'portrait', stDim: { portrait: 38, landscape: 28 }, gxDev: 'coros', showWind: true, baseLayer: 'topo' },
   wx: { data: null, fetchedAt: null, loading: false, error: false, pts: [], nWx: 0 },
   totalSec: 0
 };

@@ -33,7 +33,8 @@ Lien profond : `index.html?gpx=<url-du-gpx>` charge directement une trace (même
 | `js/weather.js` | points météo dérivés du parcours, Open‑Meteo, vent le long de la trace (face / travers / dos) |
 | `js/profile.js` | profil SVG interactif, bande vent |
 | `js/map.js` | carte Leaflet : trace colorée par segment, marqueurs, flèches de vent |
-| `js/editor.js` | onglet Course : import, réglages de détection, éditeur de segments et de points de passage |
+| `js/editor.js` | panneau ⚙ Configurer : import, ajout rapide de ravitos, réglages de détection, éditeur de segments et de points |
+| `js/osm.js` | enrichissement OpenStreetMap (Overpass) : noms de cols, fontaines |
 | `js/export.js` | PDF, stickers, GPX / TCX |
 | `js/checklist.js` | checklist d'avant‑course |
 
@@ -62,6 +63,7 @@ Lien profond : `index.html?gpx=<url-du-gpx>` charge directement une trace (même
 - Montées : vitesse résolue depuis la puissance cible (FTP × intensité), masse coureur + vélo, pente moyenne, CdA 0,34, Crr 0,005.
 - Plat : FTP × `flatIF` (62 % par défaut), CdA réduit par l'abri (`draft`).
 - Descente : 30 % FTP en roue libre, plafonné par `descentCapKmh` (technicité). Le temps est intégré tous les 100 m sur le profil réel.
+- OpenStreetMap (API Overpass) : à l'import, noms des cols (nœuds `mountain_pass`, `natural=saddle|peak`, lieux) à moins de 400 m des sommets détectés, et points d'eau potable (`amenity=drinking_water`, robinets, sources potables) à moins de 80 m de la trace. Bouton « Actualiser depuis OpenStreetMap » dans ⚙ Configurer.
 - Météo : Open‑Meteo, prévisions ≤ 16 jours. Vent échantillonné tous les ~5–8 km, comparé au cap du coureur à l'heure de passage.
 
 ## Idées pour plus tard

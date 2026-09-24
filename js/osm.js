@@ -2,7 +2,7 @@
 import { S, uid } from './state.js';
 import { llAtKm, nearestKm, hav } from './gpx.js';
 
-const ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+const ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
 function overpass(query) {
   let i = 0, retried = false;
   const tryNext = () => {

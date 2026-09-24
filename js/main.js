@@ -49,6 +49,7 @@ function syncInputs() {
   $('advWrap').style.display = st.obj === 'adv' ? '' : 'none';
   $('advRange').value = Math.round(st.advIF * 100); updateAdv();
   $('flatIF').value = Math.round(st.flatIF * 100); $('flatIFV').textContent = Math.round(st.flatIF * 100);
+  if (document.activeElement !== $('bikeKg')) $('bikeKg').value = st.bikeKg;
   syncLevels();
   $('profFount').setAttribute('aria-pressed', st.showFountains); $('gxFount').setAttribute('aria-pressed', st.showFountains);
   nutSync();
@@ -73,7 +74,7 @@ function showTab(w) {
 // ---- language / static texts ----
 function applyLang() {
   document.documentElement.setAttribute('lang', S.lang);
-  ['eyebrow', 'profcap', 'dataTitle', 'labFtp', 'labKg', 'labStart', 'goalTitle', 'o1', 'o1s', 'o2', 'o2s', 'o3', 'o3s', 'o4', 'o4s', 'advLabel', 'advUnit', 'advMore', 'labFlatIF', 'flatHint', 'labDraft', 'labDescCap', 'modelNote',
+  ['eyebrow', 'profcap', 'dataTitle', 'labFtp', 'labKg', 'labStart', 'goalTitle', 'o1', 'o1s', 'o2', 'o2s', 'o3', 'o3s', 'o4', 'o4s', 'advLabel', 'advUnit', 'advMore', 'labBike', 'bikeHint', 'labFlatIF', 'flatHint', 'labDraft', 'labDescCap', 'modelNote',
     'nutTitle', 'labGph', 'labGel', 'labBidon', 'labBsize', 'nutIsoTitle', 'nutIsoLab', 'nutRvTitle', 'rv1', 'rv2', 'nutRatesT', 'nutCarryT', 'nutPlanT',
     'mTitle', 'mHint', 'soP', 'soL', 'gxTitle', 'gxAutre', 'gxHint', 'wxTitle', 'wxDetail',
     'tabPlan', 'tabNutri', 'tabWx', 'tabCheck', 'chkTitle', 'chkIntro', 'chkReset', 'emptyTitle', 'emptyText', 'cfgTitle'].forEach(id => setText(id, id));
@@ -119,6 +120,7 @@ function wire() {
   $('start').addEventListener('change', () => { if (!S.race) return; S.race.start = $('start').value || '07:00'; saveRace(); compute(); renderConfig(); });
   $('obj').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.settings.obj = b.dataset.o; savePrefs(); syncInputs(); compute(); });
   $('advRange').addEventListener('input', () => { S.settings.advIF = (+$('advRange').value) / 100; updateAdv(); savePrefs(); compute(); });
+  $('bikeKg').addEventListener('input', () => { const v = parseFloat(String($('bikeKg').value).replace(',', '.')); if (isFinite(v) && v >= 5 && v <= 25) { S.settings.bikeKg = v; savePrefs(); compute(); } });
   $('flatIF').addEventListener('input', () => { S.settings.flatIF = (+$('flatIF').value) / 100; $('flatIFV').textContent = $('flatIF').value; savePrefs(); compute(); });
   $('draftSel').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.settings.draftLevel = b.dataset.dr; savePrefs(); syncLevels(); compute(); });
   $('descSel').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.settings.descLevel = b.dataset.dl; savePrefs(); syncLevels(); compute(); });

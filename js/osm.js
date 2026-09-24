@@ -38,10 +38,10 @@ function photonName(p) {
   const hit = cacheGet(url); if (hit) return Promise.resolve(hit);
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 10000);
   return fetch(url, { signal: ctl.signal }).then(r => { clearTimeout(tm); if (!r.ok) throw new Error('http ' + r.status); return r.json(); }).then(j => {
-    let best = null, bk = Infinity;
+    let best = null, bk = Infinity, src = '';
     (j.features || []).forEach(f => { const pr = f.properties || {}, c = f.geometry && f.geometry.coordinates; if (!pr.name || !c) return;
-      const d = hav(p.lat, p.lon, c[1], c[0]), k0 = prioTag(pr.osm_key, pr.osm_value); if (d > MAXD[k0]) return; const k = k0 * 1000 + d; if (k < bk) { bk = k; best = pr.name; } });
-    const res = { name: best || '' }; cacheSet(url, res); return res;
+      const d = hav(p.lat, p.lon, c[1], c[0]), k0 = prioTag(pr.osm_key, pr.osm_value); if (d > MAXD[k0]) return; const k = k0 * 1000 + d; if (k < bk) { bk = k; best = pr.name; src = k0 === 0 ? 'pass' : (k0 === 1 ? 'peak' : 'place'); } });
+    const res = { name: best || '', src }; cacheSet(url, res); return res;
   });
 }
 export function nameClimbsFromOSM(race, D) {
@@ -50,7 +50,7 @@ export function nameClimbsFromOSM(race, D) {
   const pts = climbs.map(s => llAtKm(race, D, summitKm(D, s)));
   let named = 0, failed = false;
   const step = i => { if (i >= climbs.length) return Promise.resolve();
-    return photonName(pts[i]).then(r => { if (r.name) { climbs[i].name = r.name; named++; } }).catch(() => { failed = true; })
+    return photonName(pts[i]).then(r => { if (r.name) { climbs[i].name = r.name; climbs[i].nameSrc = r.src; named++; } }).catch(() => { failed = true; })
       .then(() => failed ? null : new Promise(res => setTimeout(res, 250)).then(() => step(i + 1))); };
   return step(0).then(() => failed ? nameClimbsOverpass(race, D).then(n => named + n) : named);
 }
@@ -65,7 +65,7 @@ function nameClimbsOverpass(race, D) {
     climbs.forEach((s, i) => {
       const p = pts[i]; let best = null, bk = Infinity;
       nodes.forEach(n => { const d = hav(p.lat, p.lon, n.lat, n.lon), pr = PRIO(n); if (d > MAXD[pr]) return; const k = pr * 1000 + d; if (k < bk) { bk = k; best = n; } });
-      if (best) { s.name = best.tags.name; named++; }
+      if (best) { s.name = best.tags.name; s.nameSrc = PRIO(best) === 0 ? 'pass' : (PRIO(best) === 1 ? 'peak' : 'place'); named++; }
     });
     return named;
   });

@@ -33,7 +33,7 @@ export function nameClimbs(race) {
   cands.forEach(w => {
     let best = null, bd = Infinity;
     climbs.forEach(c => { const d = Math.abs((w.kind === 'summit' ? c.to : c.from) - w.km); if (d < bd) { bd = d; best = c; } });
-    if (best && bd <= 2 && !best.name) best.name = cleanName(w.name);
+    if (best && bd <= 2 && !best.name) { best.name = cleanName(w.name); best.nameSrc = 'wpt'; }
   });
 }
 // strip "Pied (de/du) …" / "Sommet (du) …" prefixes; keep "Col …" as is

@@ -101,6 +101,7 @@ export function renderConfig() {
     h += '<div class="ed-seg ' + s.type + (s.key ? ' key' : '') + '" data-i="' + i + '">' +
       '<div class="ed-row1"><select data-f="type" class="ed-sel">' + ['climb', 'flat', 'descent'].map(ty => '<option value="' + ty + '"' + (s.type === ty ? ' selected' : '') + '>' + t(ty === 'climb' ? 'segClimb' : ty === 'flat' ? 'segFlat' : 'segDescent') + '</option>').join('') + '</select>' +
       '<input data-f="name" class="ed-name" type="text" placeholder="' + esc(segName(s, s.type === 'climb' ? ci : null)) + '" value="' + esc(s.name) + '">' +
+      (s.type === 'climb' && s.name && s.nameSrc && s.nameSrc !== 'user' ? '<span class="ed-src' + (s.nameSrc === 'pass' || s.nameSrc === 'wpt' ? '' : ' weak') + '" title="' + t('src_' + s.nameSrc) + '">' + t('src_' + s.nameSrc) + '</span>' : '') +
       '<span class="ed-km">km ' + s.from + ' → ' + s.to + ' · ' + (s.to - s.from).toFixed(1) + ' km' + (D.hasEle ? ' · ' + s.grad + ' %' : '') + '</span></div>' +
       '<div class="ed-row2">' +
       (s.type === 'climb' ? '<label class="ed-chk"><input type="checkbox" data-f="key"' + (s.key ? ' checked' : '') + '> ' + t('rcSegKey') + '</label>' +
@@ -148,7 +149,7 @@ function wire(box) {
       const f = inp.dataset.f;
       if (f === 'key') s.key = inp.checked; else if (f === 'delta') s.delta = +inp.value; else if (f === 'speedKmh') s.speedKmh = inp.value ? Math.max(8, Math.min(80, +inp.value)) : null;
       else if (f === 'type') { s.type = inp.value; if (s.type === 'climb') { s.speedKmh = null; } commit(true); renderConfig(); if (s.type === 'climb' && !s.name) runOSM({ fountains: false }); return; }
-      else s[f] = inp.value;
+      else { s[f] = inp.value; if (f === 'name') s.nameSrc = 'user'; }
       commit(f === 'key');
     }));
     row.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => {

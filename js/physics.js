@@ -61,7 +61,8 @@ export function computeSegc(race, D) {
     const barrier = bars.length ? { km: bars[0].km, time: bars[0].time, label: bars[0].name } : null;
     const dangers = wps.filter(w2 => w2.kind === 'danger' && inSeg(w2));
     const warn = dangers.map(d => d.name).filter(Boolean).join(' · ');
-    return Object.assign({}, s, { spd, tSec: len * 1000 / spd, w, pct, wkg: w != null ? w / kg : null, ravitos, barrier, barriers: bars, warn, dangers });
+    const flatW = s.type === 'flat' ? Math.round(ftp * (st.flatIF || 0.62)) : null;
+    return Object.assign({}, s, { spd, tSec: len * 1000 / spd, w, pct, wkg: w != null ? w / kg : null, flatW, flatPct: flatW != null ? (st.flatIF || 0.62) : null, ravitos, barrier, barriers: bars, warn, dangers });
   });
 }
 export function cumSecAt(segc, km) {

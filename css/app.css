@@ -345,3 +345,4 @@ details.adv .sliders{margin-top:14px}
 .nsel.lv button{flex:1 1 120px}
 .nsel.lv button small{display:block;font-weight:400;font-size:.68rem;opacity:.7;margin-top:2px}
 @media(max-width:560px){.nsel.lv button{flex:1 1 40%}}
+.liaison .lw{font-family:'JetBrains Mono';font-weight:700;font-size:1.05rem;color:var(--gold);opacity:.8}.liaison .lw .u{font-size:.6em;color:var(--muted);font-weight:500}

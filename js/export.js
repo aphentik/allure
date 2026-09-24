@@ -35,7 +35,7 @@ export function generatePlanPDF() {
       doc.text(pdfSafe(r.wkg.toFixed(1) + ' W/kg · ' + (r.to - r.from).toFixed(1) + ' km · ' + fmtDur(r.tSec) + ' · ' + t('tlPass') + ' ' + fmtClock(r.passSec)), Wp - M, y, { align: 'right' }); y += LH;
     } else {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...ink); doc.text(pdfSafe(r.name + '  ·  km ' + r.from + '→' + r.to), M, y);
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray); doc.text(pdfSafe('~' + fmtDur(r.tSec) + ' · ' + t('tlPass') + ' ' + fmtClock(r.passSec)), Wp - M, y, { align: 'right' }); y += LH;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray); doc.text(pdfSafe((r.flatW != null ? '~' + r.flatW + ' W (' + Math.round(r.flatPct * 100) + '% FTP) · ' : '') + '~' + fmtDur(r.tSec) + ' · ' + t('tlPass') + ' ' + fmtClock(r.passSec)), Wp - M, y, { align: 'right' }); y += LH;
     }
     if (r.cue) { doc.setFontSize(8); doc.setTextColor(90, 120, 150); doc.text(pdfSafe(r.cue), M, y); y += LH; }
     if (r.warn) { doc.setFontSize(8); doc.setTextColor(...red); doc.text(pdfSafe('! ' + r.warn), M, y); y += LH; }
@@ -76,8 +76,8 @@ export function stickerCells() {
   const cells = []; let ci = 0;
   segc.forEach((s, i) => { const rav = ravTxt(s), warn = s.warn || '';
     if (s.type === 'climb') { ci++; cells.push({ t: s.key ? 'k' : 'c', km: Math.round(s.from) + '-' + Math.round(s.to), nm: segName(s, ci), w: s.w + 'w', key: s.key, tm: fmtDur(s.tSec), pass: fmtClock(startSec + cumSecAt(segc, s.to)), warn, rav }); }
-    else if (i === 0) cells.push({ t: 'f', km: Math.round(s.from) + '-' + Math.round(s.to), nm: segName(s), w: t('stWarm'), rav, warn });
-    else if (rav || warn) cells.push({ t: 'd', km: Math.round(s.from) + '-' + Math.round(s.to), nm: s.type === 'descent' ? t('stDesc') : segName(s), w: t('stDrink'), warn, rav }); });
+    else if (i === 0 || ((rav || warn) && s.type === 'flat')) cells.push({ t: 'f', km: Math.round(s.from) + '-' + Math.round(s.to), nm: segName(s), w: s.flatW != null ? s.flatW + 'w' : t('stWarm'), rav, warn });
+    else if (rav || warn) cells.push({ t: 'd', km: Math.round(s.from) + '-' + Math.round(s.to), nm: t('stDesc'), w: t('stDrink'), warn, rav }); });
   const nutri = { l1: fmtn(t('stNut1'), { g: np.gelsPerH.toFixed(1), b: np.bottlesPerH.toFixed(1) }), l2: fmtn(t('stNut2'), { gph: np.gph, water: np.water.toFixed(1) }) };
   return { ftp, cells, nutri, title: (race.name || 'ALLURE').toUpperCase().slice(0, 22), sub: stickerHeader() };
 }
@@ -152,6 +152,7 @@ function xesc(s) { return String(s).replace(/[&<>]/g, c => c === '&' ? '&amp;' :
 export function buildWpts() {
   const race = S.race, D = S.D, segc = computeSegc(race, D), startSec = parseStart(race.start), out = []; let ci = 0;
   segc.forEach(s => {
+    if (s.type === 'flat' && s.flatW != null && s.to - s.from >= 5) out.push({ km: s.from, sym: 'Flag, Green', pt: 'Generic', name: segName(s) + ' - ' + s.flatW + ' W', desc: (s.to - s.from).toFixed(1) + ' km - ' + t('gxAim') + ' ' + s.flatW + ' W (' + Math.round(s.flatPct * 100) + '% FTP)' });
     if (s.type === 'climb') { ci++; const nm = segName(s, ci), alt = D.hasEle ? Math.round(altAtKm(D, s.to)) : null, pass = fmtClock(startSec + cumSecAt(segc, s.to));
       out.push({ km: s.from, sym: 'Summit', pt: 'Summit', name: nm + ' ' + t('gxPied') + ' - ' + s.w + ' W (' + s.grad + '%)', desc: (s.to - s.from).toFixed(1) + ' km ' + t('gxAt') + ' ' + s.grad + '% - ' + t('gxAim') + ' ' + s.w + ' W (' + Math.round(s.pct * 100) + '% FTP)' + (s.cue ? ' - ' + s.cue : '') });
       out.push({ km: s.to, sym: 'Summit', pt: 'Summit', name: nm + ' ' + t('gxSummit') + (alt ? ' ' + alt + ' m' : '') + ' - ' + pass, desc: t('gxPass') + ' ' + pass + (s.barrier ? ' - ' + t('gxBarrier') + ' ' + s.barrier.time : '') }); }

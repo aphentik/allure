@@ -16,7 +16,7 @@ export function computePlanData() {
     const rav = (s.ravitos || []).map(r => ({ k: r.k, km: r.km, t: r.t }));
     if (s.type === 'climb') { idx++; nClimb++; wkgSum += s.w / kg;
       rows.push({ id: s.id, type: 'climb', idx, name: segName(s, idx), from: s.from, to: s.to, grad: s.grad, pct: s.pct, w: s.w, wkg: s.w / kg, key: s.key, cue: s.cue || '', warn: s.warn, tSec: s.tSec, passSec: startSec + cum, rav, bar, seg: s }); }
-    else rows.push({ id: s.id, type: 'liaison', stype: s.type, name: segName(s), from: s.from, to: s.to, grad: s.grad, cue: s.cue || '', warn: s.warn, tSec: s.tSec, passSec: startSec + cum, rav, bar, seg: s, spdKmh: s.spd * 3.6 });
+    else rows.push({ id: s.id, type: 'liaison', stype: s.type, name: segName(s), from: s.from, to: s.to, grad: s.grad, cue: s.cue || '', warn: s.warn, tSec: s.tSec, passSec: startSec + cum, rav, bar, seg: s, spdKmh: s.spd * 3.6, flatW: s.flatW, flatPct: s.flatPct });
   });
   const np = nutritionPlan();
   const nutri = { gph: np.gph, need: np.need, water: np.water.toFixed(1), gels: np.gelsToCarry, iso: np.isoDoses, waterBottles: np.waterBottles, ravitoGels: np.ravitoGels, ravito: np.ravito, perGelMin: np.perGelMin, gelsPerH: np.gelsPerH, stops: np.stops, optCodes: np.optCodes, hasRavitos: np.hasRavitos };
@@ -39,7 +39,8 @@ export function compute() {
     if (s.type === 'climb') { wkgSum += s.w / kg; nClimb++; idx++;
       html += '<div class="col ' + (s.key ? 'key' : '') + '" data-seg="' + s.id + '"><div class="idx">' + idx + '</div><div><div class="name">' + esc(segName(s, idx)) + '</div><div class="spec">km ' + s.from + '→' + s.to + ' · ' + s.grad + '% · ' + Math.round(s.pct * 100) + '% FTP</div>' + (s.cue ? '<div class="cue">' + esc(s.cue) + '</div>' : '') + warn + extra + '</div><div class="nums"><div class="w">' + s.w + '<span class="u">w</span></div><div class="wkg">' + (s.w / kg).toFixed(1) + ' W/kg</div><div class="t">' + (s.to - s.from).toFixed(1) + ' km · ' + fmtDur(s.tSec) + '</div><div class="pass">' + t('tlPass') + ' ' + fmtClock(startSec + cum) + '</div></div></div>';
     } else {
-      html += '<div class="liaison" data-seg="' + s.id + '"><div class="dot">' + (s.type === 'descent' ? '↓' : '→') + '</div><div><div class="ln">' + esc(segName(s)) + '</div><div class="ls">km ' + s.from + '→' + s.to + ' · ' + (s.ravitos && s.ravitos.length ? t('tlRecupRav') : t('tlRecup')) + ' · ≈ ' + Math.round(s.spd * 3.6) + ' km/h</div>' + (s.cue ? '<div class="cue">' + esc(s.cue) + '</div>' : '') + warn + extra + '</div><div class="lt">' + (s.to - s.from).toFixed(1) + ' km · ≈ ' + fmtDur(s.tSec) + '<div class="lp">' + t('tlPass') + ' ' + fmtClock(startSec + cum) + '</div></div></div>';
+      const mode = s.flatW != null ? Math.round(s.flatPct * 100) + '% FTP' : (s.ravitos && s.ravitos.length ? t('tlRecupRav') : t('tlRecup'));
+      html += '<div class="liaison" data-seg="' + s.id + '"><div class="dot">' + (s.type === 'descent' ? '↓' : '→') + '</div><div><div class="ln">' + esc(segName(s)) + '</div><div class="ls">km ' + s.from + '→' + s.to + ' · ' + mode + ' · ≈ ' + Math.round(s.spd * 3.6) + ' km/h</div>' + (s.cue ? '<div class="cue">' + esc(s.cue) + '</div>' : '') + warn + extra + '</div><div class="lt">' + (s.flatW != null ? '<div class="lw">' + s.flatW + '<span class="u">w</span></div>' : '') + (s.to - s.from).toFixed(1) + ' km · ≈ ' + fmtDur(s.tSec) + '<div class="lp">' + t('tlPass') + ' ' + fmtClock(startSec + cum) + '</div></div></div>';
     }
   });
   document.getElementById('timeline').innerHTML = html;

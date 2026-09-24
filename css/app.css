@@ -338,3 +338,6 @@ details.adv .sliders{margin-top:14px}
 
 .version{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);font-family:'JetBrains Mono';font-size:.68rem;color:var(--muted)}
 .version a{color:var(--ice)}.version b{color:var(--ink)}.version .ver-warn{color:var(--gold)}.version .ver-ok{color:var(--ok)}
+
+.advmodel{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.advmodel .hint{margin-top:8px;line-height:1.45}

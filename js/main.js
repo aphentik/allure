@@ -68,7 +68,7 @@ function showTab(w) {
 // ---- language / static texts ----
 function applyLang() {
   document.documentElement.setAttribute('lang', S.lang);
-  ['eyebrow', 'profcap', 'dataTitle', 'labFtp', 'labKg', 'labStart', 'goalTitle', 'o1', 'o1s', 'o2', 'o2s', 'o3', 'o3s', 'o4', 'o4s', 'advLabel', 'advUnit', 'advMore', 'labFlatIF', 'labDraft', 'labDescCap', 'draftHint',
+  ['eyebrow', 'profcap', 'dataTitle', 'labFtp', 'labKg', 'labStart', 'goalTitle', 'o1', 'o1s', 'o2', 'o2s', 'o3', 'o3s', 'o4', 'o4s', 'advLabel', 'advUnit', 'advMore', 'labFlatIF', 'flatHint', 'labDraft', 'draftHint', 'labDescCap', 'descHint',
     'nutTitle', 'labGph', 'labGel', 'labBidon', 'labBsize', 'nutIsoTitle', 'nutIsoLab', 'nutRvTitle', 'rv1', 'rv2', 'nutRatesT', 'nutCarryT', 'nutPlanT',
     'mTitle', 'mHint', 'soP', 'soL', 'gxTitle', 'gxAutre', 'gxHint', 'wxTitle', 'wxDetail',
     'tabPlan', 'tabNutri', 'tabWx', 'tabCheck', 'chkTitle', 'chkIntro', 'chkReset', 'emptyTitle', 'emptyText', 'cfgTitle'].forEach(id => setText(id, id));

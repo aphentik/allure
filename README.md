@@ -61,9 +61,9 @@ Lien profond : `index.html?gpx=<url-du-gpx>` charge directement une trace (même
 ## Modèle
 
 - Toute la trace est intégrée par pas de 100 m sur le profil réel (pente, altitude, courbure).
-- Montées : puissance constante = FTP × (base de l'objectif + décalage du col), le décalage venant de la durée estimée, de l'altitude et de la position dans la course. Vitesse résolue par la physique (masse coureur + vélo, CdA 0,34, Crr 0,005, rendement 0,97, densité de l'air décroissante avec l'altitude).
+- Montées : puissance constante = FTP × (base de l'objectif + décalage du col), le décalage venant de la durée estimée, de l'altitude et de la position dans la course. Vitesse résolue par la physique (masse coureur + 11 kg de vélo et équipement par défaut, CdA 0,34, Crr 0,005, rendement 0,97, densité de l'air décroissante avec l'altitude).
 - Plat : FTP × `flatIF`, CdA réduit par l'abri (`draftLevel` : seul 0 %, petit groupe 20 %, peloton 40 %).
-- Descente (pente < −1,5 %) : roue libre à 30 % FTP, limitée en virage par `v = sqrt(a_lat · g · R)` avec le rayon de courbure `R` de la trace et `a_lat` selon `descLevel` (prudent 0,25 g / ≤ 50 km/h, standard 0,32 g / ≤ 58, confirmé 0,40 g / ≤ 66, expert 0,50 g / ≤ 75).
+- Descente (pente < −1,5 %) : roue libre à 30 % FTP, limitée en virage par `v = sqrt(a_lat · g · R)` avec le rayon de courbure `R` de la trace et `a_lat` selon `descLevel` (prudent 0,28 g / ≤ 52 km/h, standard 0,35 g / ≤ 62, confirmé 0,45 g / ≤ 70, expert 0,55 g / ≤ 80).
 - Vent : si une prévision existe (date ≤ 16 j), la composante face/dos à l'heure de passage entre dans la traînée (vent à 10 m × 0,7) ; le calcul itère une ou deux fois entre heures de passage et vent.
 - Ces réglages ne sont libres qu'en objectif « Avancé » ; les autres objectifs utilisent des présélections (Finir tranquille 58 % · prudent, Gérer l'effort 62 % · standard, Performer 66 % · confirmé).
 - Calibration : `scripts/calib/` compare le modèle à des activités réelles (voir plus bas) pour régler ces constantes.

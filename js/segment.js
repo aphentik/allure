@@ -83,7 +83,7 @@ export function defaultDelta(D, s, refMin) {
   if (pos > 0.8) d -= 0.03; else if (pos > 0.6) d -= 0.01;
   return Math.max(-0.08, Math.min(0.08, Math.round(d * 100) / 100));
 }
-function estMinutes(D, s) { const ftp = ftpVal(), mass = kgVal() + (S.settings.bikeKg || 8); return (s.to - s.from) * 1000 / solveSpeed(ftp * 0.75, mass, Math.max(1, s.grad)) / 60; }
+function estMinutes(D, s) { const ftp = ftpVal(), mass = kgVal() + (S.settings.bikeKg || 11); return (s.to - s.from) * 1000 / solveSpeed(ftp * 0.75, mass, Math.max(1, s.grad)) / 60; }
 export function applyDefaults(segs, D) {
   const climbs = segs.filter(s => s.type === 'climb');
   climbs.forEach(s => { s.delta = defaultDelta(D, s); s.key = false; });

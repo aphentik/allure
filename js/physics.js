@@ -5,7 +5,8 @@ import { S } from './state.js';
 import { altAtKm, bearingAtKm, PROFILE_STEP_KM } from './gpx.js';
 
 const G = 9.81;
-export const MODEL = { CdA: 0.34, CdAdesc: 0.30, Crr: 0.005, eff: 0.97, coastIF: 0.30, vMin: 8 / 3.6, vMax: 75 / 3.6, windHeightFactor: 0.7 };
+// bikeKg default 11 = bike ~8–9 kg + kit, bottles, food ~2–3 kg (calibrated: equivalent mass ≈ body + 12 kg on 12 climbs with power)
+export const MODEL = { CdA: 0.34, CdAdesc: 0.30, Crr: 0.005, eff: 0.97, coastIF: 0.30, vMin: 8 / 3.6, vMax: 80 / 3.6, windHeightFactor: 0.7 };
 
 export function airDensity(altM) { return 1.225 * Math.exp(-(altM || 0) / 8500); }
 
@@ -22,7 +23,8 @@ export function solveSpeed(power, mass, gradPct, opt) {
 }
 export const BASE = { chill: 0.68, diesel: 0.75, perf: 0.80 };
 // descending level → lateral acceleration accepted in corners (g) and absolute cap (km/h)
-export const DESC_LEVELS = { prudent: { aLat: 0.25, cap: 50 }, standard: { aLat: 0.32, cap: 58 }, confirme: { aLat: 0.40, cap: 66 }, expert: { aLat: 0.50, cap: 75 } };
+// calibrated 2026-09-24 on 4 FIT activities (8 descents): an 'expert' rider matched a_lat ≈ 0.5 g / 75 km/h
+export const DESC_LEVELS = { prudent: { aLat: 0.28, cap: 52 }, standard: { aLat: 0.35, cap: 62 }, confirme: { aLat: 0.45, cap: 70 }, expert: { aLat: 0.55, cap: 80 } };
 export const DRAFT_LEVELS = { seul: 0, groupe: 0.20, peloton: 0.40 };
 // flat / descent model presets per objective; 'adv' uses the user's own settings
 const PRESETS = { chill: { flatIF: 0.58, draft: 0.20, descLevel: 'prudent' }, diesel: { flatIF: 0.62, draft: 0.20, descLevel: 'standard' }, perf: { flatIF: 0.66, draft: 0.20, descLevel: 'confirme' } };
@@ -62,7 +64,7 @@ function stepSpeed(mode, g, alt, ctx) {
 // Enriched segments: spd (m/s), tSec, w, pct, flatW, ravitos, barrier, warn.
 // opt.windFn: km → {speed, dir} | null (built by compute() from the forecast at estimated pass times).
 export function computeSegc(race, D, opt) {
-  const st = modelParams(), ftp = ftpVal(), kg = kgVal(), mass = kg + (S.settings.bikeKg || 8), base = baseIntensity();
+  const st = modelParams(), ftp = ftpVal(), kg = kgVal(), mass = kg + (S.settings.bikeKg || 11), base = baseIntensity();
   const windFn = opt && opt.windFn, wps = race.waypoints || [];
   return race.segments.map(s => {
     const len = s.to - s.from; let spd, w = null, pct = null;

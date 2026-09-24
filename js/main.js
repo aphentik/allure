@@ -155,6 +155,7 @@ function wire() {
 (function boot() {
   if (location.protocol === 'file:') { $('fileBanner').style.display = ''; }
   loadPrefs();
+  if (S.settings.bikeKg === 8) S.settings.bikeKg = 11; // pre-calibration default
   if (!DESC_LEVELS[S.settings.descLevel]) { const c = S.settings.descentCapKmh || 48; S.settings.descLevel = c < 44 ? 'prudent' : c < 52 ? 'standard' : c < 59 ? 'confirme' : 'expert'; }
   if (DRAFT_LEVELS[S.settings.draftLevel] == null) { const d = S.settings.draft || 0.2; S.settings.draftLevel = d < 0.1 ? 'seul' : d < 0.3 ? 'groupe' : 'peloton'; }
   document.documentElement.setAttribute('data-theme', S.theme);

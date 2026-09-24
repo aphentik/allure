@@ -40,13 +40,14 @@ export function handleFile(file, setRace) {
 function commit(structural) { assignCodes(S.race, S.D); saveRace(); emit('race-edit', { structural: !!structural }); }
 
 let osmStatus = '';
-export function runOSM() {
+export function runOSM(opt) {
   const race = S.race, D = S.D; if (!race || !D) return Promise.resolve();
+  const doF = !(opt && opt.fountains === false);
   osmStatus = t('osmBusy'); paintStatus();
   // sequential: public Overpass instances throttle concurrent requests per IP
-  return nameClimbsFromOSM(race, D).catch(() => null).then(c => fountainsFromOSM(race, D).catch(() => null).then(f => [c, f])).then(([c, f]) => {
+  return nameClimbsFromOSM(race, D).catch(() => null).then(c => (doF ? fountainsFromOSM(race, D).catch(() => null) : Promise.resolve(0)).then(f => [c, f])).then(([c, f]) => {
     if (S.race !== race) return;
-    osmStatus = (c == null && f == null) ? t('osmErr') : fmtn(t('osmDone'), { c: c || 0, f: f || 0 });
+    osmStatus = (c == null && (f == null || !doF)) ? t('osmErr') : fmtn(t('osmDone'), { c: c || 0, f: f || 0 });
     commit(true); renderConfig();
   });
 }
@@ -138,20 +139,20 @@ function wire(box) {
   q('rcReset').addEventListener('click', e => { const b = e.currentTarget; if (b.dataset.armed) { emit('race-reset'); } else { b.dataset.armed = '1'; b.textContent = t('rcResetConfirm'); setTimeout(() => { b.dataset.armed = ''; b.textContent = t('rcReset'); }, 4000); } });
   if (D.hasEle) {
     [['sgGrad', 'minGrad'], ['sgKm', 'minKm'], ['sgDip', 'dipKm']].forEach(([id, k]) => { const r = q(id); r.addEventListener('input', () => { S.settings.seg[k] = +r.value; q(id + 'V').textContent = r.value; }); });
-    q('sgRun').addEventListener('click', () => { const ns = autoSegments(D, S.settings.seg); reattachEdits(race.segments, ns); race.segments = ns; commit(true); renderConfig(); });
+    q('sgRun').addEventListener('click', () => { const ns = autoSegments(D, S.settings.seg); reattachEdits(race.segments, ns); race.segments = ns; commit(true); renderConfig(); runOSM({ fountains: false }); });
   }
   box.querySelectorAll('.ed-seg').forEach(row => {
     const i = +row.dataset.i, s = race.segments[i];
     row.querySelectorAll('[data-f]').forEach(inp => inp.addEventListener(inp.type === 'text' ? 'input' : 'change', () => {
       const f = inp.dataset.f;
       if (f === 'key') s.key = inp.checked; else if (f === 'delta') s.delta = +inp.value; else if (f === 'speedKmh') s.speedKmh = inp.value ? Math.max(8, Math.min(80, +inp.value)) : null;
-      else if (f === 'type') { s.type = inp.value; if (s.type === 'climb') { s.speedKmh = null; } commit(true); renderConfig(); return; }
+      else if (f === 'type') { s.type = inp.value; if (s.type === 'climb') { s.speedKmh = null; } commit(true); renderConfig(); if (s.type === 'climb' && !s.name) runOSM({ fountains: false }); return; }
       else s[f] = inp.value;
       commit(f === 'key');
     }));
     row.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => {
       if (b.dataset.a === 'merge') mergeWithNext(race.segments, D, i); else splitAt(race.segments, D, i, (s.from + s.to) / 2);
-      commit(true); renderConfig();
+      commit(true); renderConfig(); if (b.dataset.a === 'split' && s.type === 'climb') runOSM({ fountains: false });
     }));
   });
   box.querySelectorAll('.ed-wp').forEach(row => {

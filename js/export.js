@@ -1,7 +1,7 @@
 // PDF plan, stickers, GPX/TCX export.
 import { S } from './state.js';
 import { t, fmtn, fmtDur, fmtClock, fmtDate, segName, esc } from './i18n.js';
-import { computeSegc, cumSecAt, parseStart, ftpVal, kgVal } from './physics.js';
+import { currentSegc, cumSecAt, parseStart, ftpVal, kgVal } from './physics.js';
 import { nutritionPlan } from './nutrition.js';
 import { computePlanData, objLabel } from './plan.js';
 import { llAtKm, altAtKm } from './gpx.js';
@@ -67,7 +67,7 @@ export function generatePlanPDF() {
 // ---- stickers ----
 function stickerHeader() { const D = S.D; return Math.round(D.totalKm) + 'km' + (D.hasEle ? '/' + D.dplus + 'm' : ''); }
 export function stickerCells() {
-  const ftp = ftpVal(), race = S.race, D = S.D, segc = computeSegc(race, D), startSec = parseStart(race.start), np = nutritionPlan(), stopMap = {};
+  const ftp = ftpVal(), race = S.race, D = S.D, segc = currentSegc(), startSec = parseStart(race.start), np = nutritionPlan(), stopMap = {};
   np.stops.forEach(x => { stopMap[x.code] = x; });
   const founts = (race.waypoints || []).filter(w => w.kind === 'fountain');
   function ravTxt(s) { const parts = (s.ravitos || []).map(r => { const st = stopMap[r.k], lab = r.k === 'ARR' ? 'ARR' : r.k + ' km' + r.km; return (st && !st.required) ? '(' + lab + ')' : lab; });
@@ -150,7 +150,7 @@ export function stSyncControls() {
 // ---- GPS export ----
 function xesc(s) { return String(s).replace(/[&<>]/g, c => c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'); }
 export function buildWpts() {
-  const race = S.race, D = S.D, segc = computeSegc(race, D), startSec = parseStart(race.start), out = []; let ci = 0;
+  const race = S.race, D = S.D, segc = currentSegc(), startSec = parseStart(race.start), out = []; let ci = 0;
   segc.forEach(s => {
     if (s.type === 'flat' && s.flatW != null && s.to - s.from >= 5) out.push({ km: s.from, sym: 'Flag, Green', pt: 'Generic', name: segName(s) + ' - ' + s.flatW + ' W', desc: (s.to - s.from).toFixed(1) + ' km - ' + t('gxAim') + ' ' + s.flatW + ' W (' + Math.round(s.flatPct * 100) + '% FTP)' });
     if (s.type === 'climb') { ci++; const nm = segName(s, ci), alt = D.hasEle ? Math.round(altAtKm(D, s.to)) : null, pass = fmtClock(startSec + cumSecAt(segc, s.to));

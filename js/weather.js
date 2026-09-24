@@ -1,6 +1,6 @@
 import { S, emit } from './state.js';
 import { t, fmtn, fmtClock, fmtHM, fmtDate, segName, esc } from './i18n.js';
-import { computeSegc, cumSecAt, parseStart } from './physics.js';
+import { currentSegc, cumSecAt, parseStart } from './physics.js';
 import { llAtKm, bearingAtKm, altAtKm } from './gpx.js';
 
 const WXCODE = {
@@ -74,15 +74,25 @@ function sample(i, passSec) {
   const lp = a => a[h0] + (a[h1] - a[h0]) * f;
   return { temp: lp(H.temperature_2m), feels: lp(H.apparent_temperature), code: H.weather_code[hp], wind: H.wind_speed_10m[hp], gust: H.wind_gusts_10m[hp], wdir: H.wind_direction_10m[hp], pop: H.precipitation_probability[hp] };
 }
+// Wind at a km and a clock time (s from midnight): interpolated between the two nearest wind points. null without forecast.
+export function windAtKm(km, passSec) {
+  const W = S.wx; if (!W.data || !W.pts || W.pts.length <= W.nWx) return null;
+  const pts = W.pts.slice(W.nWx); let j = 0; while (j < pts.length - 1 && pts[j + 1].km < km) j++;
+  const a = pts[j], b = pts[Math.min(pts.length - 1, j + 1)], f = b.km > a.km ? Math.max(0, Math.min(1, (km - a.km) / (b.km - a.km))) : 0;
+  const sa = sample(W.nWx + j, passSec), sb = sample(W.nWx + Math.min(pts.length - 1, j + 1), passSec); if (!sa || !sb) return null;
+  const r = Math.PI / 180, ux = sa.wind * Math.sin(sa.wdir * r) * (1 - f) + sb.wind * Math.sin(sb.wdir * r) * f, uy = sa.wind * Math.cos(sa.wdir * r) * (1 - f) + sb.wind * Math.cos(sb.wdir * r) * f;
+  return { speed: Math.hypot(ux, uy), dir: ((Math.atan2(ux, uy) / r) + 360) % 360 };
+}
+export function windUsed() { return !!(S.windFn && S.wx.data); }
 export function wxSeries() {
   const W = S.wx; if (!W.data || !S.race) return null;
-  const segc = computeSegc(S.race, S.D), startSec = parseStart(S.race.start);
+  const segc = currentSegc(), startSec = parseStart(S.race.start);
   return W.pts.slice(0, W.nWx).map((p, i) => { const passSec = startSec + cumSecAt(segc, p.km), s = sample(i, passSec); return Object.assign({ pt: p, passSec, ok: !!s }, s || {}); });
 }
 // wind along the route: {km, lat, lon, passSec, wind, gust, wdir, bearing, rel, cls}
 export function windSeries() {
   const W = S.wx; if (!W.data || !S.race) return null;
-  const segc = computeSegc(S.race, S.D), startSec = parseStart(S.race.start);
+  const segc = currentSegc(), startSec = parseStart(S.race.start);
   return W.pts.slice(W.nWx).map((p, j) => {
     const i = W.nWx + j, passSec = startSec + cumSecAt(segc, p.km), s = sample(i, passSec); if (!s) return null;
     const br = bearingAtKm(S.race, S.D, p.km), rel = Math.cos((s.wdir - br) * Math.PI / 180);
@@ -147,7 +157,7 @@ export function renderSummary() {
     (hi !== vi ? '  ·  ' + fmtn(t('wxSummits'), { name: esc(pts[hi].name) }) + ' <b>' + sMin + '–' + sMax + '°</b>' : '') +
     '  ·  💨 ' + (dir != null ? windDir(dir) + ' ' : '') + '<b>' + wind + '</b> km/h  ·  🌧️ <b>' + pop + '%</b></div>';
   const ws = windSeries(); if (ws && ws.length) { const wt = windTotals(ws);
-    h += '<div class="wxbar-stats wxwind">' + fmtn(t('wxWindLine'), { head: Math.round(wt.tot.head), cross: Math.round(wt.tot.cross), tail: Math.round(wt.tot.tail) }) + (wt.worst ? ' · <span class="wxworst">' + fmtn(t('wxWindWorst'), wt.worst) + '</span>' : '') + '</div>'; }
+    h += '<div class="wxbar-stats wxwind">' + fmtn(t('wxWindLine'), { head: Math.round(wt.tot.head), cross: Math.round(wt.tot.cross), tail: Math.round(wt.tot.tail) }) + (wt.worst ? ' · <span class="wxworst">' + fmtn(t('wxWindWorst'), wt.worst) + '</span>' : '') + (windUsed() ? ' · <span class="wxused">✓ ' + t('wxWindUsed') + '</span>' : '') + '</div>'; }
   h += '<div class="wxbar-adv">' + adv.join(' ') + '</div>';
   body.innerHTML = h;
 }

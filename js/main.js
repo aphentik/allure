@@ -29,6 +29,7 @@ function renderAll() {
   $('viewEmpty').style.display = has ? 'none' : '';
   ['profile', 'wxSumPanel', 'actionBar', 'hdrActions'].forEach(id => { $(id).style.display = has ? '' : 'none'; });
   document.querySelectorAll('.tab[data-tab]').forEach(b => { if (b.dataset.tab !== 'check') b.style.display = has ? '' : 'none'; });
+  if (!has) S.windFn = null;
   renderHeader(); renderConfig(); if (!has) { renderEmpty(); $('mapWrap').style.display = 'none'; }
   if (!has) return;
   syncInputs(); buildProfile(); compute(); buildMap();
@@ -55,7 +56,7 @@ function syncInputs() {
 function syncLevels() {
   const st = S.settings;
   document.querySelectorAll('#draftSel button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.dr === st.draftLevel); b.innerHTML = t('dr_' + b.dataset.dr) + '<small>' + t('dr_' + b.dataset.dr + '_h') + '</small>'; });
-  document.querySelectorAll('#descSel button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.dl === st.descLevel); b.innerHTML = t('dl_' + b.dataset.dl) + ' · ' + DESC_LEVELS[b.dataset.dl] + ' km/h<small>' + t('dl_' + b.dataset.dl + '_h') + '</small>'; });
+  document.querySelectorAll('#descSel button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.dl === st.descLevel); b.innerHTML = t('dl_' + b.dataset.dl) + ' · ≤ ' + DESC_LEVELS[b.dataset.dl].cap + ' km/h<small>' + t('dl_' + b.dataset.dl + '_h') + '</small>'; });
 }
 function updateAdv() {
   const r = $('advRange'), v = +r.value; $('advVal').textContent = v;
@@ -145,6 +146,7 @@ function wire() {
   on('race-edit', d => { renderHeader(); syncInputs(); buildProfile(); compute(); buildMap();
     if (d && d.structural && S.wx.data) { const np = buildWxPoints(S.race, S.D), old = S.wx.pts.slice(0, S.wx.nWx); const same = np.length === old.length && np.every((p, i) => Math.abs(p.km - old[i].km) < 0.05);
       if (same) { np.forEach((p, i) => { old[i].name = p.name; old[i].key = p.key; }); renderWeather(); } else { clearTimeout(wxTimer); wxTimer = setTimeout(fetchWeather, 1500); } } });
+  on('wx', () => { if (S.race) compute(); }); // forecast arrived or refreshed → recompute with wind
   on('race-date', () => { $('wxSub').innerHTML = fmtn(t('wxSub'), { date: fmtDate(S.race.date) }); $('wxSumTitle').textContent = fmtn(t('wxSumTitle'), { date: fmtDate(S.race.date) }); fetchWeather(); });
   on('race-reset', () => { clearRace().then(() => { S.race = null; S.D = null; S.wx.data = null; closeModals(); renderAll(); renderWeather(); showTab('plan'); }); });
 }

@@ -70,7 +70,20 @@ export function buildTrack(pts) {
 
   let minAlt = Infinity, maxAlt = -Infinity;
   profile.forEach(p => { if (p[1] < minAlt) minAlt = p[1]; if (p[1] > maxAlt) maxAlt = p[1]; });
-  return { cum, ele, totalKm: totalM / 1000, hasEle, profile, dplus: Math.round(dplus), minAlt, maxAlt };
+  // curve radius (m) at each profile step from points 50 m before / after, bounded [15, 1000]
+  const radius = new Float32Array(profile.length);
+  const at = d => { let j = 0; return dd => { while (j < n - 2 && cum[j + 1] < dd) j++; const a = cum[j], b = cum[j + 1], f = b > a ? (dd - a) / (b - a) : 0; return [pts[j][0] + (pts[j + 1][0] - pts[j][0]) * f, pts[j][1] + (pts[j + 1][1] - pts[j][1]) * f]; }; };
+  const look = at(0), kx = Math.cos((pts[0][0]) * Math.PI / 180) * 111320, ky = 110540;
+  for (let k = 0; k < profile.length; k++) {
+    const d = profile[k][0] * 1000;
+    if (d < 50 || d > totalM - 50) { radius[k] = 1000; continue; }
+    const A = look(d - 50), B = look(d), C = look(d + 50);
+    const ax = (A[1] - B[1]) * kx, ay = (A[0] - B[0]) * ky, cx = (C[1] - B[1]) * kx, cy = (C[0] - B[0]) * ky;
+    const cross = Math.abs(ax * cy - ay * cx), la = Math.hypot(ax, ay), lc = Math.hypot(cx, cy), lac = Math.hypot(ax - cx, ay - cy);
+    const r = cross > 1e-6 ? (la * lc * lac) / (2 * cross) : 1000;
+    radius[k] = Math.max(15, Math.min(1000, r));
+  }
+  return { cum, ele, totalKm: totalM / 1000, hasEle, profile, dplus: Math.round(dplus), minAlt, maxAlt, radius };
 }
 
 function smoothByDistance(ele, cum, halfWin) {

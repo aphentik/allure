@@ -60,12 +60,13 @@ Lien profond : `index.html?gpx=<url-du-gpx>` charge directement une trace (même
 
 ## Modèle
 
-- Montées : vitesse résolue depuis la puissance cible (FTP × intensité), masse coureur + vélo, pente moyenne, CdA 0,34, Crr 0,005.
+- Toute la trace est intégrée par pas de 100 m sur le profil réel (pente, altitude, courbure).
+- Montées : puissance constante = FTP × (base de l'objectif + décalage du col), le décalage venant de la durée estimée, de l'altitude et de la position dans la course. Vitesse résolue par la physique (masse coureur + vélo, CdA 0,34, Crr 0,005, rendement 0,97, densité de l'air décroissante avec l'altitude).
 - Plat : FTP × `flatIF`, CdA réduit par l'abri (`draftLevel` : seul 0 %, petit groupe 20 %, peloton 40 %).
-- Descente : 30 % FTP en roue libre, plafonné selon `descLevel` (prudent 40, standard 48, confirmé 55, expert 62 km/h). Le temps est intégré tous les 100 m sur le profil réel.
-- Ces trois réglages ne sont libres qu'en objectif « Avancé » ; les autres objectifs utilisent des présélections (Finir tranquille 58 % · prudent, Gérer l'effort 62 % · standard, Performer 66 % · confirmé).
-- OpenStreetMap : à l'import, noms des cols via Photon (reverse geocoding komoot : cols et selles à moins de 600 m, sinon sommets et lieux à moins d'1 km ; repli Overpass), et points d'eau potable via Overpass (`amenity=drinking_water`, robinets, sources potables) à moins de 80 m de la trace. Serveurs Overpass : OSM France, overpass-api.de, mail.ru. Réponses mises en cache 7 jours dans le navigateur. Bouton « Actualiser depuis OpenStreetMap » dans ⚙ Configurer.
-- Météo : Open‑Meteo, prévisions ≤ 16 jours. Vent échantillonné tous les ~5–8 km, comparé au cap du coureur à l'heure de passage.
+- Descente (pente < −1,5 %) : roue libre à 30 % FTP, limitée en virage par `v = sqrt(a_lat · g · R)` avec le rayon de courbure `R` de la trace et `a_lat` selon `descLevel` (prudent 0,25 g / ≤ 50 km/h, standard 0,32 g / ≤ 58, confirmé 0,40 g / ≤ 66, expert 0,50 g / ≤ 75).
+- Vent : si une prévision existe (date ≤ 16 j), la composante face/dos à l'heure de passage entre dans la traînée (vent à 10 m × 0,7) ; le calcul itère une ou deux fois entre heures de passage et vent.
+- Ces réglages ne sont libres qu'en objectif « Avancé » ; les autres objectifs utilisent des présélections (Finir tranquille 58 % · prudent, Gérer l'effort 62 % · standard, Performer 66 % · confirmé).
+- Calibration : `scripts/calib/` compare le modèle à des activités réelles (voir plus bas) pour régler ces constantes.
 
 ## Versions
 
@@ -78,6 +79,14 @@ scripts/release.sh 0.4.0 "Notes de version"
 ```
 
 (met à jour `js/version.js`, commit, tag `v0.4.0`, push, release GitHub).
+
+## Calibration (développement)
+
+```bash
+node scripts/calib/run.mjs activites/        # FIT ou GPX horodatés, dossier ignoré par git
+```
+
+Pour chaque activité : reconstruction de la trace, segmentation automatique, puis comparaison réel / prévu par segment : à puissance réelle (FIT avec capteur) pour juger la physique, et au pacing Allure pour juger les cibles. Rapport dans `scripts/calib/REPORT.md`, grille de recherche sur CdA, Crr, masse équipement, fraction roue libre et `a_lat`.
 
 ## Idées pour plus tard
 

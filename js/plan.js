@@ -1,14 +1,14 @@
 import { S } from './state.js';
 import { t, fmtn, fmtDur, fmtClock, segName, esc } from './i18n.js';
-import { computeSegc, cumSecAt, parseStart, ftpVal, kgVal, baseIntensity } from './physics.js';
+import { computeSegc, currentSegc, cumSecAt, parseStart, ftpVal, kgVal, baseIntensity } from './physics.js';
 import { computeNutrition, nutritionPlan } from './nutrition.js';
-import { renderWeather } from './weather.js';
+import { renderWeather, windAtKm } from './weather.js';
 import { buildWind } from './map.js';
 
 // Plan rows (shared by timeline, PDF, stickers, GPS export)
 export function computePlanData() {
   const race = S.race, D = S.D, ftp = ftpVal(), kg = kgVal(), startSec = parseStart(race.start);
-  const segc = computeSegc(race, D);
+  const segc = currentSegc();
   let cum = 0, wkgSum = 0, nClimb = 0, idx = 0; const rows = [];
   segc.forEach(s => {
     cum += s.tSec; let bar = null;
@@ -26,7 +26,18 @@ export function objLabel() { const o = S.settings.obj; return o === 'adv' ? t('o
 
 export function compute() {
   if (!S.race || !S.D) return;
-  const race = S.race, D = S.D, ftp = ftpVal(), kg = kgVal(), startSec = parseStart(race.start), segc = computeSegc(race, D);
+  const race = S.race, D = S.D, ftp = ftpVal(), kg = kgVal(), startSec = parseStart(race.start);
+  // wind iteration: pass times without wind → wind at those times → recompute (once more if the total moved > 2 min)
+  S.windFn = null;
+  let segc = computeSegc(race, D);
+  if (S.wx.data && S.wx.pts && S.wx.pts.length > S.wx.nWx) {
+    for (let it = 0; it < 2; it++) {
+      const prev = segc, fn = km => windAtKm(km, startSec + cumSecAt(prev, km));
+      segc = computeSegc(race, D, { windFn: fn }); S.windFn = fn;
+      const tot = a => a.reduce((x, s) => x + s.tSec, 0);
+      if (Math.abs(tot(segc) - tot(prev)) < 120) break;
+    }
+  }
   let cum = 0, wkgSum = 0, nClimb = 0, idx = 0, html = '';
   segc.forEach(s => {
     cum += s.tSec;

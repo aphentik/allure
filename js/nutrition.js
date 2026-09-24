@@ -1,6 +1,6 @@
 import { S } from './state.js';
 import { t, fmtn, fmtDur, fmtClock, esc } from './i18n.js';
-import { computeSegc, cumSecAt, parseStart, kgVal } from './physics.js';
+import { currentSegc, cumSecAt, parseStart, kgVal } from './physics.js';
 
 export const RAVITO_GEL_G = 25;
 export function wxMaxTemp() {
@@ -21,7 +21,7 @@ export function nutritionPlan() {
   const gelsPerH = gGel > 0 ? gelCarbsH / gGel : 0;
   const need = Math.round(gph * hrs), totalWater = water * hrs, gelCarbsTot = gelCarbsH * hrs;
   const isoDoses = Math.ceil(totalWater / bsize * isoFrac);
-  const segc = computeSegc(race, D), startSec = parseStart(race.start), finKm = D.totalKm, C = 2 * bsize;
+  const segc = currentSegc(), startSec = parseStart(race.start), finKm = D.totalKm, C = 2 * bsize;
   const ravs = [];
   segc.forEach(s => (s.ravitos || []).forEach(r => { if (r.k !== 'ARR') ravs.push({ k: r.k, km: r.km, sec: startSec + cumSecAt(segc, r.km) }); }));
   ravs.sort((a, b) => a.km - b.km);

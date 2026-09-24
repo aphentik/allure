@@ -259,7 +259,7 @@
 .prof-wind{position:relative;height:6px;margin:0 0 4px;display:none}
 .prof-wind span{position:absolute;top:0;height:100%;opacity:.85}
 .mapwrap{margin-top:12px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg2)}
-#map{height:min(62vw,460px);width:100%}
+#map{height:min(62vw,460px);width:100%;position:relative;overflow:hidden}
 .mapctl{display:flex;gap:4px;background:rgba(12,22,32,.85);border:1px solid #3a5a76;border-radius:999px;padding:3px}
 .mapctl button{font-family:'JetBrains Mono';font-weight:700;font-size:.66rem;color:#cfe0ea;background:none;border:none;border-radius:999px;padding:5px 10px;cursor:pointer}
 .mapctl button[aria-pressed="true"]{background:#f2b43d;color:#1a1206}

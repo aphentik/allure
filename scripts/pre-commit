@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Stamps js/version.js with the commit time so the page can tell whether it is the latest deployed build.
+set -e
+cd "$(git rev-parse --show-toplevel)"
+TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+if grep -q "build:" js/version.js; then
+  sed -i '' "s/build: '[^']*'/build: '$TS'/" js/version.js
+else
+  sed -i '' "s/export const VERSION = { tag: '\([^']*\)', date: '\([^']*\)' };/export const VERSION = { tag: '\1', date: '\2', build: '$TS' };/" js/version.js
+fi
+git add js/version.js

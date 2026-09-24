@@ -85,18 +85,20 @@ function applyLang() {
   stSyncControls(); gxSync(); renderChecklist(); relabelMap();
   savePrefs(); renderAll();
 }
-let verAhead = null; // null = unknown, number = commits on main since this tag
+let verInfo = null; // {sha, date} of latest commit on main, from the GitHub API
 function renderVersion() {
   const e = $('version'); if (!e) return;
-  const base = 'https://github.com/' + REPO;
+  const base = 'https://github.com/' + REPO, build = VERSION.build ? new Date(VERSION.build) : null;
   let h = fmtn(t('verLine'), { tag: VERSION.tag, date: fmtDate(VERSION.date), url: base + '/releases/tag/v' + VERSION.tag });
-  if (verAhead != null) h += ' · <span class="' + (verAhead > 0 ? 'ver-warn' : 'ver-ok') + '">' + (verAhead > 0 ? fmtn(t('verAhead'), { n: verAhead, url: base + '/compare/v' + VERSION.tag + '...main' }) : t('verOk')) + '</span>';
+  if (build) h += ' · build ' + build.toLocaleString(S.lang === 'en' ? 'en-GB' : 'fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  if (verInfo && build) { const behind = new Date(verInfo.date) - build > 90 * 1000; // main committed after this build
+    h += ' · <span class="' + (behind ? 'ver-warn' : 'ver-ok') + '">' + (behind ? fmtn(t('verBehind'), { sha: verInfo.sha.slice(0, 7), url: base + '/commits/main' }) : t('verOk')) + '</span>'; }
   e.innerHTML = h;
   $('eyebrow').textContent = t('eyebrow') + ' · v' + VERSION.tag;
 }
 function checkVersion() {
-  fetch('https://api.github.com/repos/' + REPO + '/compare/v' + VERSION.tag + '...main', { headers: { Accept: 'application/vnd.github+json' } })
-    .then(r => r.ok ? r.json() : null).then(j => { if (j && typeof j.ahead_by === 'number') { verAhead = j.ahead_by; renderVersion(); } }).catch(() => {});
+  fetch('https://api.github.com/repos/' + REPO + '/commits/main', { headers: { Accept: 'application/vnd.github+json' } })
+    .then(r => r.ok ? r.json() : null).then(j => { if (j && j.sha) { verInfo = { sha: j.sha, date: j.commit.committer.date }; renderVersion(); } }).catch(() => {});
 }
 function applyTheme(th) { S.theme = th; document.documentElement.setAttribute('data-theme', th); $('themeBtn').textContent = th === 'light' ? t('theme_dark') : t('theme_light'); savePrefs(); }
 

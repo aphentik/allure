@@ -68,7 +68,7 @@ Lien profond : `index.html?gpx=<url-du-gpx>` charge directement une trace (même
 
 ## Versions
 
-La version affichée en bas de page vient de `js/version.js` ; la page compare ce tag à `main` via l'API GitHub et signale si elle a du retard (cache Pages ≈ 10 min).
+La version affichée en bas de page vient de `js/version.js` : tag de release + horodatage de build, écrit par le hook `pre-commit` à chaque commit (installer une fois avec `scripts/install-hooks.sh`). La page compare cet horodatage au dernier commit de `main` via l'API GitHub et signale si elle est en retard (cache Pages ≈ 10 min).
 
 Publier une version :
 

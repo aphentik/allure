@@ -10,6 +10,7 @@ import { initMap, buildMap, relabelMap } from './map.js';
 import { renderChecklist, resetChecklist } from './checklist.js';
 import { generatePlanPDF, generateStickerPDF, buildStickerPreview, stSyncControls, generateExport, gxSync, busy, routeText } from './export.js';
 import { renderConfig, renderEmpty, initEditor, handleFile, runOSM } from './editor.js';
+import { VERSION, REPO } from './version.js';
 
 const $ = id => document.getElementById(id);
 function setText(id, k) { const e = $(id); if (e) e.textContent = t(k); }
@@ -76,12 +77,26 @@ function applyLang() {
   $('wxRefresh').textContent = t('wxRefresh'); $('wxSumRefresh').textContent = t('wxRefresh'); $('wxSumDetail').textContent = t('wxDetail');
   $('sodium').innerHTML = t('sodium');
   $('foot').innerHTML = fmtn(t('foot'), { bike: S.settings.bikeKg });
+  renderVersion();
   $('themeBtn').textContent = S.theme === 'light' ? t('theme_dark') : t('theme_light');
   $('wxSub').innerHTML = fmtn(t('wxSub'), { date: S.race && S.race.date ? fmtDate(S.race.date) : '…' });
   $('wxSumTitle').textContent = fmtn(t('wxSumTitle'), { date: S.race && S.race.date ? fmtDate(S.race.date) : '' });
   document.querySelectorAll('.langsel button').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === S.lang));
   stSyncControls(); gxSync(); renderChecklist(); relabelMap();
   savePrefs(); renderAll();
+}
+let verAhead = null; // null = unknown, number = commits on main since this tag
+function renderVersion() {
+  const e = $('version'); if (!e) return;
+  const base = 'https://github.com/' + REPO;
+  let h = fmtn(t('verLine'), { tag: VERSION.tag, date: fmtDate(VERSION.date), url: base + '/releases/tag/v' + VERSION.tag });
+  if (verAhead != null) h += ' · <span class="' + (verAhead > 0 ? 'ver-warn' : 'ver-ok') + '">' + (verAhead > 0 ? fmtn(t('verAhead'), { n: verAhead, url: base + '/compare/v' + VERSION.tag + '...main' }) : t('verOk')) + '</span>';
+  e.innerHTML = h;
+  $('eyebrow').textContent = t('eyebrow') + ' · v' + VERSION.tag;
+}
+function checkVersion() {
+  fetch('https://api.github.com/repos/' + REPO + '/compare/v' + VERSION.tag + '...main', { headers: { Accept: 'application/vnd.github+json' } })
+    .then(r => r.ok ? r.json() : null).then(j => { if (j && typeof j.ahead_by === 'number') { verAhead = j.ahead_by; renderVersion(); } }).catch(() => {});
 }
 function applyTheme(th) { S.theme = th; document.documentElement.setAttribute('data-theme', th); $('themeBtn').textContent = th === 'light' ? t('theme_dark') : t('theme_light'); savePrefs(); }
 
@@ -133,7 +148,7 @@ function wire() {
   if (location.protocol === 'file:') { $('fileBanner').style.display = ''; }
   loadPrefs();
   document.documentElement.setAttribute('data-theme', S.theme);
-  wire(); initProfile(); initMap(); initEditor(setRace);
+  wire(); initProfile(); initMap(); initEditor(setRace); checkVersion();
   const qs = new URLSearchParams(location.search);
   if (qs.has('debug')) { const log = m => { let e = $('errlog'); if (!e) { e = document.createElement('pre'); e.id = 'errlog'; e.className = 'banner'; e.style.cssText = 'white-space:pre-wrap;position:fixed;bottom:70px;left:8px;right:8px;z-index:99;max-height:40vh;overflow:auto'; document.body.appendChild(e); } e.textContent += m + '\n'; };
     window.addEventListener('error', e => log('ERR ' + e.message + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno)); window.addEventListener('unhandledrejection', e => log('REJ ' + (e.reason && e.reason.stack || e.reason))); window.__log = log; }

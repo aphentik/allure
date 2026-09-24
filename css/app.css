@@ -335,3 +335,6 @@ details.adv .sliders{margin-top:14px}
 .qa .ed-name{flex:1 1 140px}
 .qa .actbtn{padding:8px 14px;font-size:.8rem}
 @media(max-width:560px){.modal:has(.sheet.dark){padding:0}.sheet.dark{border-radius:0;min-height:100vh;padding:14px 12px 40px}}
+
+.version{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);font-family:'JetBrains Mono';font-size:.68rem;color:var(--muted)}
+.version a{color:var(--ice)}.version b{color:var(--ink)}.version .ver-warn{color:var(--gold)}.version .ver-ok{color:var(--ok)}

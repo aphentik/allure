@@ -66,6 +66,18 @@ Lien profond : `index.html?gpx=<url-du-gpx>` charge directement une trace (même
 - OpenStreetMap (API Overpass) : à l'import, noms des cols (nœuds `mountain_pass`, `natural=saddle|peak`, lieux) à moins de 400 m des sommets détectés, et points d'eau potable (`amenity=drinking_water`, robinets, sources potables) à moins de 80 m de la trace. Bouton « Actualiser depuis OpenStreetMap » dans ⚙ Configurer.
 - Météo : Open‑Meteo, prévisions ≤ 16 jours. Vent échantillonné tous les ~5–8 km, comparé au cap du coureur à l'heure de passage.
 
+## Versions
+
+La version affichée en bas de page vient de `js/version.js` ; la page compare ce tag à `main` via l'API GitHub et signale si elle a du retard (cache Pages ≈ 10 min).
+
+Publier une version :
+
+```bash
+scripts/release.sh 0.4.0 "Notes de version"
+```
+
+(met à jour `js/version.js`, commit, tag `v0.4.0`, push, release GitHub).
+
 ## Idées pour plus tard
 
 - Partage d'un plan par URL (fichier course compressé dans le hash).

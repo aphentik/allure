@@ -1,6 +1,6 @@
 # Allure
 
-Outil de pacing pour cyclosportives : importe la trace GPX de ta course, obtiens un plan watts col par col, un plan nutrition, la météo (et le vent) à l'heure de passage, la carte du parcours, puis exporte le tout en PDF, sticker top‑tube ou fichier GPX/TCX enrichi pour ton compteur.
+Outil de pacing pour cyclosportives : import d'une trace GPX, plan watts col par col, plan nutrition, météo et vent à l'heure de passage, carte du parcours, exports PDF, sticker top‑tube et GPX/TCX enrichi pour compteur.
 
 Site statique, sans build : `index.html` + `css/app.css` + modules ES dans `js/`.
 

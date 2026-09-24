@@ -1,6 +1,7 @@
 // Automatic segmentation of a resampled profile into climb / descent / flat.
 import { PROFILE_STEP_KM } from './gpx.js';
-import { uid } from './state.js';
+import { S, uid } from './state.js';
+import { solveSpeed, ftpVal, kgVal } from './physics.js';
 
 export const SEG_DEFAULTS = { minGrad: 2.5, minKm: 1.5, dipKm: 2.5 };
 const DIP_MAX_LOSS_M = 80, SHORT_LINK_KM = 3.5, CLIMB_MIN_GAIN_M = 70;
@@ -73,14 +74,19 @@ export function autoSegments(D, params) {
 function i2km(P, i) { return +P[Math.min(P.length - 1, i)][0].toFixed(1); }
 function mk(type, from, to, grad) { return { id: uid('s'), type, name: '', from: +from.toFixed(1), to: +to.toFixed(1), grad, delta: 0, key: false, cue: '', speedKmh: null }; }
 
-// default delta + key climbs
+// Default intensity offset per climb (vs the objective's base), from the estimated climb duration
+// (power-duration logic: short efforts sustain more), altitude and fatigue (position in the race).
+export function defaultDelta(D, s, refMin) {
+  const min = refMin != null ? refMin : estMinutes(D, s), summit = altAt(D, s.to), pos = s.from / D.totalKm;
+  let d = min <= 5 ? 0.08 : min <= 10 ? 0.06 : min <= 20 ? 0.04 : min <= 40 ? 0.02 : min <= 75 ? 0 : min <= 120 ? -0.02 : -0.04;
+  if (summit > 2000) d -= 0.02;
+  if (pos > 0.8) d -= 0.03; else if (pos > 0.6) d -= 0.01;
+  return Math.max(-0.08, Math.min(0.08, Math.round(d * 100) / 100));
+}
+function estMinutes(D, s) { const ftp = ftpVal(), mass = kgVal() + (S.settings.bikeKg || 8); return (s.to - s.from) * 1000 / solveSpeed(ftp * 0.75, mass, Math.max(1, s.grad)) / 60; }
 export function applyDefaults(segs, D) {
   const climbs = segs.filter(s => s.type === 'climb');
-  climbs.forEach(s => {
-    const len = s.to - s.from, summit = altAt(D, s.to);
-    let d = 0; if (len > 15 || summit > 2000) d = -0.02; if (s.from > 0.8 * D.totalKm) d = -0.04;
-    s.delta = d; s.key = false;
-  });
+  climbs.forEach(s => { s.delta = defaultDelta(D, s); s.key = false; });
   climbs.map(s => ({ s, gain: altAt(D, s.to) - altAt(D, s.from) })).sort((a, b) => b.gain - a.gain).slice(0, 2).forEach(x => { x.s.key = true; });
 }
 function altAt(D, km) { const P = D.profile, i = Math.max(0, Math.min(P.length - 1, Math.round(km / PROFILE_STEP_KM))); return P[i][1]; }

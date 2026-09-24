@@ -8,7 +8,8 @@ import { assignCodes } from './physics.js';
 import { dl, slug } from './export.js';
 import { nameClimbsFromOSM, fountainsFromOSM } from './osm.js';
 
-const DELTAS = [[-0.06, 'dNeg6'], [-0.04, 'dNeg4'], [-0.02, 'dNeg2'], [0, 'd0'], [0.02, 'dPos2'], [0.04, 'dPos4']];
+const DELTAS = Array.from({ length: 17 }, (_, i) => (i - 8) / 100); // -8 % … +8 % vs the objective's base intensity
+const deltaLabel = d => Math.abs(d) < 1e-9 ? t('d0') : (d > 0 ? '+' : '−') + Math.round(Math.abs(d) * 100) + ' %';
 let importInfo = null; // {n, unmatched}
 
 export function raceFromGPXText(text) {
@@ -103,7 +104,7 @@ export function renderConfig() {
       '<span class="ed-km">km ' + s.from + ' → ' + s.to + ' · ' + (s.to - s.from).toFixed(1) + ' km' + (D.hasEle ? ' · ' + s.grad + ' %' : '') + '</span></div>' +
       '<div class="ed-row2">' +
       (s.type === 'climb' ? '<label class="ed-chk"><input type="checkbox" data-f="key"' + (s.key ? ' checked' : '') + '> ' + t('rcSegKey') + '</label>' +
-        '<label class="ed-lab">' + t('rcSegDelta') + ' <select data-f="delta" class="ed-sel">' + DELTAS.map(d => '<option value="' + d[0] + '"' + (Math.abs((s.delta || 0) - d[0]) < 1e-9 ? ' selected' : '') + '>' + t(d[1]) + '</option>').join('') + '</select></label>'
+        '<label class="ed-lab">' + t('rcSegDelta') + ' <select data-f="delta" class="ed-sel">' + DELTAS.map(d => '<option value="' + d + '"' + (Math.abs((s.delta || 0) - d) < 0.005 ? ' selected' : '') + '>' + deltaLabel(d) + '</option>').join('') + '</select></label>'
         : '<label class="ed-lab">' + t('rcSegSpeed') + ' <input data-f="speedKmh" class="ed-num" type="number" min="8" max="80" step="1" placeholder="' + t('rcSpeedAuto') + '" value="' + (s.speedKmh || '') + '"> km/h</label>') +
       '<input data-f="cue" class="ed-cue" type="text" placeholder="' + t('rcSegCue') + '" value="' + esc(s.cue) + '">' +
       '<span class="ed-btns">' + (i < race.segments.length - 1 ? '<button data-a="merge" title="' + t('rcMerge') + '">⤵ ' + t('rcMerge') + '</button>' : '') + (s.to - s.from >= 1 ? '<button data-a="split" title="' + t('rcSplit') + '">✂ ' + t('rcSplit') + '</button>' : '') + '</span></div></div>';

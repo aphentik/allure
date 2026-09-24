@@ -56,8 +56,6 @@ function syncLevels() {
   const st = S.settings;
   document.querySelectorAll('#draftSel button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.dr === st.draftLevel); b.innerHTML = t('dr_' + b.dataset.dr) + '<small>' + t('dr_' + b.dataset.dr + '_h') + '</small>'; });
   document.querySelectorAll('#descSel button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.dl === st.descLevel); b.innerHTML = t('dl_' + b.dataset.dl) + ' · ' + DESC_LEVELS[b.dataset.dl] + ' km/h<small>' + t('dl_' + b.dataset.dl + '_h') + '</small>'; });
-  $('draftHint').textContent = fmtn(t('draftHint'), { pct: Math.round((DRAFT_LEVELS[st.draftLevel] || 0) * 100) });
-  $('descHint').textContent = fmtn(t('descHint'), { cap: DESC_LEVELS[st.descLevel] || 48 });
 }
 function updateAdv() {
   const r = $('advRange'), v = +r.value; $('advVal').textContent = v;

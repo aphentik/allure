@@ -14,6 +14,7 @@ JS
 git add js/version.js
 git commit -q --allow-empty -m "Release v$TAG"
 git tag -a "v$TAG" -m "v$TAG"
-git push -q origin main "v$TAG"
+git push -q origin main
+git push -q origin "v$TAG"
 echo "tagged and pushed v$TAG → https://github.com/aphentik/allure/releases/tag/v$TAG"
 gh release create "v$TAG" --title "v$TAG" --notes "$NOTES" >/dev/null 2>&1 && echo "GitHub release created" || echo "GitHub release not created (gh account lacks write access) — create it from the tag page if wanted"

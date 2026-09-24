@@ -1,6 +1,6 @@
 // OpenStreetMap enrichment via Overpass: climb names + drinking-water points.
 import { S, uid } from './state.js';
-import { llAtKm, nearestKm, hav } from './gpx.js';
+import { llAtKm, nearestKm, hav, PROFILE_STEP_KM } from './gpx.js';
 
 const ENDPOINTS = ['https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass-api.de/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
 const PHOTON = 'https://photon.komoot.io/reverse';
@@ -28,10 +28,12 @@ const PRIO = n => n.tags.mountain_pass === 'yes' || n.tags.natural === 'saddle' 
 
 // Names unnamed climbs. Primary: Photon reverse geocoding (one request per summit, cached);
 // fallback: Overpass. Passes/saddles within 600 m, else peaks/places within 1 km.
-const MAXD = { 0: 600, 1: 1000, 2: 1000 };
+const MAXD = { 0: 1000, 1: 1000, 2: 1000 };
+// true summit of a climb: highest profile point within ±1.5 km of the detected end (the grade flattens before the pass sign)
+function summitKm(D, s) { const P = D.profile, i0 = Math.max(0, Math.round((s.to - 1.5) / PROFILE_STEP_KM)), i1 = Math.min(P.length - 1, Math.round((s.to + 1.5) / PROFILE_STEP_KM)); let best = s.to, ba = -Infinity; for (let i = i0; i <= i1; i++) if (P[i][1] > ba) { ba = P[i][1]; best = P[i][0]; } return D.hasEle ? best : s.to; }
 const prioTag = (k, v) => (k === 'mountain_pass' || (k === 'natural' && v === 'saddle')) ? 0 : (k === 'natural' && v === 'peak' ? 1 : 2);
 function photonName(p) {
-  const url = PHOTON + '?lat=' + p.lat.toFixed(5) + '&lon=' + p.lon.toFixed(5) + '&radius=1&limit=8&lang=fr' +
+  const url = PHOTON + '?lat=' + p.lat.toFixed(5) + '&lon=' + p.lon.toFixed(5) + '&radius=1&limit=25&lang=fr' +
     ['mountain_pass:yes', 'natural:saddle', 'natural:peak', 'place:village', 'place:hamlet', 'place:locality', 'place:isolated_dwelling'].map(t => '&osm_tag=' + t).join('');
   const hit = cacheGet(url); if (hit) return Promise.resolve(hit);
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 10000);
@@ -45,7 +47,7 @@ function photonName(p) {
 export function nameClimbsFromOSM(race, D) {
   const climbs = race.segments.filter(s => s.type === 'climb' && !s.name);
   if (!climbs.length) return Promise.resolve(0);
-  const pts = climbs.map(s => llAtKm(race, D, s.to));
+  const pts = climbs.map(s => llAtKm(race, D, summitKm(D, s)));
   let named = 0, failed = false;
   const step = i => { if (i >= climbs.length) return Promise.resolve();
     return photonName(pts[i]).then(r => { if (r.name) { climbs[i].name = r.name; named++; } }).catch(() => { failed = true; })
@@ -55,7 +57,7 @@ export function nameClimbsFromOSM(race, D) {
 function nameClimbsOverpass(race, D) {
   const climbs = race.segments.filter(s => s.type === 'climb' && !s.name);
   if (!climbs.length) return Promise.resolve(0);
-  const pts = climbs.map(s => llAtKm(race, D, s.to));
+  const pts = climbs.map(s => llAtKm(race, D, summitKm(D, s)));
   const q = '[out:json][timeout:20];(' + pts.map(p => { const a = 'around:1000,' + p.lat.toFixed(5) + ',' + p.lon.toFixed(5);
     return 'node(' + a + ')["mountain_pass"="yes"]["name"];node(' + a + ')["natural"="saddle"]["name"];node(' + a + ')["natural"="peak"]["name"];node(' + a + ')["place"~"^(village|hamlet|locality|isolated_dwelling|neighbourhood)$"]["name"];'; }).join('') + ');out body;';
   return overpass(q).then(j => {

@@ -256,8 +256,6 @@
 
 /* ---- Allure additions ---- */
 .profile.noele{display:none}
-.prof-wind{position:relative;height:6px;margin:0 0 4px;display:none}
-.prof-wind span{position:absolute;top:0;height:100%;opacity:.85}
 .mapwrap{margin-top:12px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg2);position:relative;z-index:0;isolation:isolate}
 #map{height:min(62vw,460px);width:100%;position:relative;overflow:hidden}
 .mapctl{display:flex;gap:4px;background:rgba(12,22,32,.85);border:1px solid #3a5a76;border-radius:999px;padding:3px}
@@ -266,6 +264,8 @@
 .maplegend{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:rgba(12,22,32,.85);border:1px solid #3a5a76;border-radius:10px;padding:6px 10px;font-family:'JetBrains Mono';font-size:.64rem;color:#eaf1f5;max-width:min(92vw,520px)}
 .maplegend:empty{display:none}
 .maplegend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.maplegend i.ln{width:16px;height:4px;border-radius:2px;vertical-align:1px}
+.maplegend .lg-sep{width:100%;height:0;margin:-4px 0}
 .maplegend .lg-muted{color:#89a2b4;width:100%}
 .leaflet-container{font-family:'Inter',system-ui,sans-serif;background:#0f1e2b}
 .maptip{font-family:'JetBrains Mono';font-size:.7rem;background:#152838;color:#eaf1f5;border:1px solid #395975;border-radius:8px;padding:5px 8px;box-shadow:0 5px 16px rgba(0,0,0,.45)}

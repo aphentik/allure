@@ -1,7 +1,6 @@
 import { S, on, emit } from './state.js';
 import { t, segName, esc } from './i18n.js';
 import { altAtKm, gradAround } from './gpx.js';
-import { windSeries } from './weather.js';
 
 const VW = 1000, VH = 320, TOP = 32, BOT = 300;
 let alt = { min: 0, max: 1 };
@@ -9,7 +8,6 @@ function niceStep(range, targets) { for (const s of targets) if (range / s <= 7)
 function profX(km) { return km / S.D.totalKm * VW; }
 function profY(a) { const d = alt.max - alt.min || 1; return TOP + (alt.max - a) / d * (BOT - TOP); }
 function localMaxKm(km, win) { const P = S.D.profile; let best = km, ba = -1e9; P.forEach(p => { if (Math.abs(p[0] - km) <= win && p[1] > ba) { ba = p[1]; best = p[0]; } }); return best; }
-const WCOL = { head: '#e2503b', cross: '#f2b43d', tail: '#5fc27e', calm: '#5f7d95' };
 
 export function buildProfile() {
   const svg = document.getElementById('profSvg'), wrap = document.getElementById('profile'); if (!svg) return;
@@ -45,22 +43,13 @@ export function buildProfile() {
   const fount = S.settings.showFountains ? ('<g fill="#3ad6a2" stroke="#0c1620" stroke-width="0.8">' + (race.waypoints || []).filter(w => w.kind === 'fountain').map(w => { const x = profX(w.km), y = profY(altAtKm(D, w.km)); return '<path d="M' + x.toFixed(1) + ',' + (y - 3.2).toFixed(1) + ' L' + (x + 3.2).toFixed(1) + ',' + y.toFixed(1) + ' L' + x.toFixed(1) + ',' + (y + 3.2).toFixed(1) + ' L' + (x - 3.2).toFixed(1) + ',' + y.toFixed(1) + ' Z"/>'; }).join('') + '</g>') : '';
   const dng = '<g font-size="11">' + (race.waypoints || []).filter(w => w.kind === 'danger').map(w => { const x = profX(w.km), y = profY(altAtKm(D, w.km)); return '<text x="' + x.toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" text-anchor="middle">⚠</text>'; }).join('') + '</g>';
   svg.innerHTML = defs + shade + grid + fill + stroke + fount + cols + rav + dng;
-  buildAxis(); buildWindBand();
+  buildAxis();
 }
 function buildAxis() {
   const D = S.D, total = D.totalKm, step = niceStep(total, [5, 10, 20, 25, 50, 100]); let h = '';
   for (let km = 0; km < total - step * 0.4; km += step) { const pct = km / total * 100; h += '<span style="left:' + pct + '%;transform:' + (km === 0 ? 'none' : 'translateX(-50%)') + '">' + km + '</span>'; }
   h += '<span style="left:100%;transform:translateX(-100%)">' + Math.round(total) + ' <span class="u">km</span></span>';
   document.getElementById('profAxis').innerHTML = h;
-}
-export function buildWindBand() {
-  const band = document.getElementById('profWind'); if (!band) return;
-  const ws = windSeries();
-  if (!ws || !ws.length || !S.ui.showWind) { band.innerHTML = ''; band.style.display = 'none'; return; }
-  const total = S.D.totalKm; let h = '';
-  ws.forEach((w, i) => { const a = i === 0 ? 0 : (ws[i - 1].km + w.km) / 2, b = i === ws.length - 1 ? total : (w.km + ws[i + 1].km) / 2;
-    h += '<span style="left:' + (a / total * 100) + '%;width:' + ((b - a) / total * 100) + '%;background:' + WCOL[w.cls] + '" title="km ' + w.km + ' · ' + Math.round(w.wind) + ' km/h · ' + t('wind' + w.cls[0].toUpperCase() + w.cls.slice(1)) + '"></span>'; });
-  band.innerHTML = h; band.style.display = '';
 }
 let cross, dot, tip, plot;
 export function showCursor(km, fromMap) {
@@ -87,5 +76,4 @@ export function initProfile() {
   plot.addEventListener('touchmove', e => { if (e.touches[0]) move(e.touches[0].clientX); }, { passive: true });
   plot.addEventListener('touchend', () => hideCursor());
   on('hover-km', d => { if (d.src === 'map') { if (d.km == null) hideCursor(true); else showCursor(d.km, true); } });
-  on('wx', buildWindBand); on('wind-toggle', buildWindBand);
 }

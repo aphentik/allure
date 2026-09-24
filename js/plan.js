@@ -3,7 +3,6 @@ import { t, fmtn, fmtDur, fmtClock, segName, esc } from './i18n.js';
 import { computeSegc, cumSecAt, parseStart, ftpVal, kgVal, baseIntensity } from './physics.js';
 import { computeNutrition, nutritionPlan } from './nutrition.js';
 import { renderWeather } from './weather.js';
-import { buildWindBand } from './profile.js';
 import { buildWind } from './map.js';
 
 // Plan rows (shared by timeline, PDF, stickers, GPS export)
@@ -47,5 +46,5 @@ export function compute() {
   document.getElementById('totalTime').textContent = fmtDur(cum);
   document.getElementById('totalMeta').innerHTML = t('metaLine') + '<br>' + t('metaArr') + ' <b>' + fmtClock(startSec + cum) + '</b>' + (nClimb ? ' · ' + t('metaAvg1') + ' <b>' + (wkgSum / nClimb).toFixed(1) + '</b> ' + t('metaAvg2') : '');
   S.totalSec = cum;
-  computeNutrition(); renderWeather(); buildWindBand(); buildWind();
+  computeNutrition(); renderWeather(); buildWind();
 }

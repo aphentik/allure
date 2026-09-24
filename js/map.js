@@ -4,7 +4,7 @@ import { llAtKm, altAtKm, nearestKm } from './gpx.js';
 import { windSeries, windDir } from './weather.js';
 
 let map = null, layers = {}, base = {}, hoverMarker = null, ready = false;
-const SEGCOL = { climb: '#f2b43d', key: '#e2503b', descent: '#74bccd', flat: '#8fa3b3' };
+const SEGCOL = { climb: '#ff8c1a', key: '#ff8c1a', descent: '#3aa0ff', flat: '#dfe6ee' };
 const WCOL = { head: '#e2503b', cross: '#f2b43d', tail: '#5fc27e', calm: '#8fa3b3' };
 
 function ensureMap() {
@@ -74,12 +74,13 @@ export function buildMap() {
   setTimeout(() => { map.invalidateSize(); map.fitBounds(bounds, { padding: [20, 20] }); }, 30);
   buildWind();
 }
+function segLegend() { return '<span><i class="ln" style="background:' + SEGCOL.climb + '"></i>' + t('segClimb') + '</span><span><i class="ln" style="background:' + SEGCOL.descent + '"></i>' + t('segDescent') + '</span><span><i class="ln" style="background:' + SEGCOL.flat + '"></i>' + t('segFlat') + '</span>'; }
 export function buildWind() {
   if (!map || !ready) return;
   layers.wind.clearLayers();
   const leg = document.getElementById('mapLegend');
   const ws = windSeries();
-  if (!ws || !ws.length) { if (leg) leg.innerHTML = '<span class="lg-muted">' + t(S.wx.status === 'nodate' || S.wx.status === 'toofar' ? 'windNoDate' : 'windNoData') + '</span>'; return; }
+  if (!ws || !ws.length) { if (leg) leg.innerHTML = segLegend() + '<span class="lg-muted">' + t(S.wx.status === 'nodate' || S.wx.status === 'toofar' ? 'windNoDate' : 'windNoData') + '</span>'; return; }
   ws.forEach(w => {
     const len = 14 + Math.max(0, Math.min(1, (w.wind - 5) / 35)) * 22, sw = 2 + Math.max(0, Math.min(1, (w.wind - 5) / 35)) * 2, col = WCOL[w.cls], rot = (w.wdir + 180) % 360;
     const html = '<div class="warrow" style="transform:rotate(' + rot.toFixed(0) + 'deg)"><svg width="44" height="44" viewBox="-22 -22 44 44"><line x1="0" y1="' + (len / 2).toFixed(1) + '" x2="0" y2="' + (-len / 2).toFixed(1) + '" stroke="' + col + '" stroke-width="' + sw.toFixed(1) + '" stroke-linecap="round"/><path d="M0,' + (-len / 2).toFixed(1) + ' l-5,7 M0,' + (-len / 2).toFixed(1) + ' l5,7" stroke="' + col + '" stroke-width="' + sw.toFixed(1) + '" fill="none" stroke-linecap="round"/></svg></div><div class="wlab" style="color:' + col + '">' + Math.round(w.wind) + '</div>';
@@ -87,7 +88,7 @@ export function buildWind() {
     m.bindTooltip('<b>' + t('wind' + w.cls[0].toUpperCase() + w.cls.slice(1)) + '</b><br>km ' + w.km + ' · ' + fmtClock(w.passSec) + '<br>' + Math.round(w.wind) + ' km/h ' + windDir(w.wdir) + ' · ' + t('wxGust') + ' ' + Math.round(w.gust), { className: 'maptip' });
     m.addTo(layers.wind);
   });
-  if (leg) leg.innerHTML = '<span><i style="background:' + WCOL.head + '"></i>' + t('windHead') + '</span><span><i style="background:' + WCOL.cross + '"></i>' + t('windCross') + '</span><span><i style="background:' + WCOL.tail + '"></i>' + t('windTail') + '</span><span class="lg-muted">' + t('windLegend') + '</span>';
+  if (leg) leg.innerHTML = segLegend() + (S.ui.showWind ? '<span class="lg-muted">' + t('windLegend') + '</span>' : '');
 }
 export function initMap() {
   on('hover-km', d => { if (!map || d.src !== 'profile') return; if (d.km == null) clearHover(); else setHover(d.km); });

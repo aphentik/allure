@@ -3,17 +3,18 @@ import { nearestKm } from './gpx.js';
 import { uid } from './state.js';
 
 export const KINDS = ['ravito', 'fountain', 'barrier', 'danger', 'summit', 'foot', 'other'];
+// word-boundary based rules on normalised text (accents stripped, lowercase)
 const RULES = [
-  ['ravito', /ravit|aid|feed|food|refresh|nutrition|buffet/],
-  ['barrier', /barri|contr[oô]|cut.?off|checkpoint|limite|time limit|hors delai|pointage/],
-  ['danger', /danger|attention|caution|hazard|prudence|chute|gravel|tunnel|virage|travaux/],
-  ['fountain', /fontaine|fountain|water|eau|source|bouteille|drink|robinet|cimetiere|cemetery/],
-  ['summit', /^col |^col$|^cold |summit|sommet|\bpass\b|^mont |^pas de|^port de|^puerto|^passo/],
-  ['foot', /pied|foot|bottom|base|debut|start of/]
+  ['ravito', /\b(ravito|ravitaillement|ravit\w*|aid station|feed( zone| station)?|food|refreshment|nutrition|buffet|stand|assistance)\b/],
+  ['barrier', /\b(barriere|barrier|controle|checkpoint|cut.?off|limite horaire|time limit|hors delai|pointage|point de contro\w*)\b/],
+  ['danger', /\b(danger|dangereux|attention|caution|hazard|prudence|chute|gravier|gravel|tunnel|virage serre|travaux|passage a niveau)\b/],
+  ['fountain', /\b(fontaine|fountain|drinking water|water( point| tap)?|point d.?eau|eau potable|eau|robinet|source|bouteille d.?eau|cimetiere|cemetery)\b/],
+  ['summit', /^(col|cold|pas|port|puerto|passo|passo di|mont|sommet|summit)\b|\b(summit|sommet|pass)$/],
+  ['foot', /^(pied|foot|bottom|base|debut)\b/]
 ];
 function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 export function classifyWpt(w) {
-  const txt = norm(w.name + ' ' + w.desc + ' ' + w.sym);
+  const txt = norm(w.name + ' ' + w.desc + ' ' + (/^\d+$/.test(w.sym || '') ? '' : w.sym));
   if (/^water$/i.test(w.type || '') || /water/i.test(w.sym || '')) return 'fountain';
   for (const [k, re] of RULES) if (re.test(txt)) return k;
   return 'other';

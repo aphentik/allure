@@ -29,13 +29,15 @@ function predictAtPower(D, s, power, mass, params) {
   let t = 0, k = s.from; const p = Object.assign({ CdA: MODEL.CdA, Crr: MODEL.Crr, coastIF: MODEL.coastIF, aLat: 0.32, cap: 58 }, params);
   while (k < s.to - 1e-9) { const k2 = Math.min(s.to, k + PROFILE_STEP_KM), g = (altAtKm(D, k2) - altAtKm(D, k)) / ((k2 - k) * 1000) * 100, alt = altAtKm(D, (k + k2) / 2), rho = airDensity(alt);
     let v; if (g <= -1.5) { v = Math.min(solveSpeed(FTP * p.coastIF, mass, g, { CdA: MODEL.CdAdesc, rho, Crr: p.Crr }), p.cap / 3.6); const i = Math.round(((k + k2) / 2) / PROFILE_STEP_KM); let r = Infinity; for (let j = Math.max(0, i - 1); j <= Math.min(D.radius.length - 1, i + 1); j++) r = Math.min(r, D.radius[j]); v = Math.min(v, Math.sqrt(p.aLat * 9.81 * r)); }
-    else v = solveSpeed(power, mass, g, { CdA: p.CdA, rho, Crr: p.Crr });
+    else v = solveSpeed(Math.max(power || 0, 60), mass, g, { CdA: p.CdA, rho, Crr: p.Crr });
     t += (k2 - k) * 1000 / Math.max(0.5, v); k = k2; }
   return t;
 }
 
 const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => /\.(fit|gpx)$/i.test(f)).map(f => path.join(dir, f)) : [];
 if (!files.length) { console.error('Aucun fichier .fit/.gpx dans', dir); process.exit(1); }
+// mass (rider+bike) that reproduces the real time at real power, bisection
+function massFor(D, s, power, real) { let lo = 50, hi = 150; for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (predictAtPower(D, s, power, mid, {}) < real) lo = mid; else hi = mid; } return (lo + hi) / 2; }
 const rows = []; let report = '# Calibration Allure — ' + new Date().toISOString().slice(0, 10) + '\n\nFTP ' + FTP + ' W · ' + KG + ' kg · vélo ' + BIKE + ' kg · ' + files.length + ' activité(s)\n';
 for (const file of files) {
   const pts = loadActivity(file).filter(p => p.t != null); if (pts.length < 100) { report += '\n## ' + path.basename(file) + '\nfichier ignoré (pas de points horodatés)\n'; continue; }
@@ -43,11 +45,12 @@ for (const file of files) {
   S.race = race; S.D = D; const segc = computeSegc(race, D);
   const hasPower = pts.filter(p => p.power != null).length > pts.length * 0.5;
   report += '\n## ' + path.basename(file) + '\n' + D.totalKm.toFixed(1) + ' km · ' + D.dplus + ' m D+ · puissance ' + (hasPower ? 'oui' : 'non') + ' · temps en mouvement réel ' + (movingTime(pts, 0, pts.length - 1) / 3600).toFixed(2) + ' h · prévu (pacing Gérer) ' + (segc.reduce((a, s) => a + s.tSec, 0) / 3600).toFixed(2) + ' h\n\n';
-  report += '| type | km | pente | réel | prévu pacing | écart | P réelle | prévu à P réelle | écart phys. |\n|---|---|---|---|---|---|---|---|---|\n';
+  report += '| type | km | pente | réel | prévu pacing | écart | P réelle | prévu à P réelle | écart phys. | masse équiv. |\n|---|---|---|---|---|---|---|---|---|---|\n';
   segc.forEach(s => { const i0 = idxAtKm(D, s.from), i1 = idxAtKm(D, s.to), real = movingTime(pts, i0, i1), pw = hasPower ? avgPower(pts, i0, i1) : null;
     const phys = pw != null && s.type === 'climb' ? predictAtPower(D, s, pw, KG + BIKE, {}) : null;
+    const meq = phys != null && real > 300 ? massFor(D, s, pw, real) : null;
     rows.push({ file: path.basename(file), type: s.type, from: s.from, to: s.to, grad: s.grad, real, pred: s.tSec, pw, phys, D, s });
-    report += `| ${s.type} | ${s.from}→${s.to} | ${s.grad}% | ${(real / 60).toFixed(0)} min | ${(s.tSec / 60).toFixed(0)} min | ${real ? ((s.tSec / real - 1) * 100).toFixed(0) : '–'} % | ${pw != null ? Math.round(pw) + ' W' : '–'} | ${phys != null ? (phys / 60).toFixed(0) + ' min' : '–'} | ${phys != null ? ((phys / real - 1) * 100).toFixed(0) + ' %' : '–'} |\n`; });
+    report += `| ${s.type} | ${s.from}→${s.to} | ${s.grad}% | ${(real / 60).toFixed(0)} min | ${(s.tSec / 60).toFixed(0)} min | ${real ? ((s.tSec / real - 1) * 100).toFixed(0) : '–'} % | ${pw != null ? Math.round(pw) + ' W' : '–'} | ${phys != null ? (phys / 60).toFixed(0) + ' min' : '–'} | ${phys != null ? ((phys / real - 1) * 100).toFixed(0) + ' %' : '–'} | ${meq != null ? meq.toFixed(1) + ' kg' : '–'} |\n`; });
 }
 // aggregate
 const agg = {}; rows.forEach(r => { if (!r.real) return; const k = r.type; agg[k] = agg[k] || { n: 0, sum: 0, sq: 0 }; const e = r.pred / r.real - 1; agg[k].n++; agg[k].sum += e; agg[k].sq += e * e; });
@@ -61,9 +64,10 @@ if (climbs.length) {
   report += `\n## Physique en montée (${climbs.length} montées avec puissance)\n\nMeilleur jeu : CdA ${best.CdA} · Crr ${best.Crr} · masse vélo+équipement ${best.bike} kg → erreur RMS ${(best.rm * 100).toFixed(1)} % (défauts actuels : CdA ${MODEL.CdA}, Crr ${MODEL.Crr}, ${BIKE} kg).\n`;
 }
 const descents = rows.filter(r => r.type === 'descent' && r.real > 120);
+if (descents.length) { report += '\n## Descentes — détail\n\n| km | réel | modèle standard | écart |\n|---|---|---|---|\n'; descents.forEach(r => { const p = predictAtPower(r.D, r.s, r.pw || FTP * 0.5, KG + BIKE, {}); report += `| ${r.from}→${r.to} | ${(r.real / 60).toFixed(0)} min | ${(p / 60).toFixed(0)} min | ${((p / r.real - 1) * 100).toFixed(0)} % |\n`; }); }
 if (descents.length) {
   let best = null;
-  for (const aLat of [0.25, 0.32, 0.4, 0.5]) for (const cap of [50, 58, 66, 75]) for (const coastIF of [0.2, 0.3, 0.4]) { let se = 0; descents.forEach(r => { const p = predictAtPower(r.D, r.s, 0, KG + BIKE, { aLat, cap, coastIF }); const e = p / r.real - 1; se += e * e; }); const rm = Math.sqrt(se / descents.length); if (!best || rm < best.rm) best = { aLat, cap, coastIF, rm }; }
+  for (const aLat of [0.25, 0.32, 0.4, 0.5]) for (const cap of [50, 58, 66, 75]) for (const coastIF of [0.2, 0.3, 0.4]) { let se = 0; descents.forEach(r => { const p = predictAtPower(r.D, r.s, r.pw || FTP * 0.5, KG + BIKE, { aLat, cap, coastIF }); const e = p / r.real - 1; se += e * e; }); const rm = Math.sqrt(se / descents.length); if (!best || rm < best.rm) best = { aLat, cap, coastIF, rm }; }
   report += `\n## Descentes (${descents.length})\n\nMeilleur jeu : a_lat ${best.aLat} g · plafond ${best.cap} km/h · relance ${Math.round(best.coastIF * 100)} % FTP → erreur RMS ${(best.rm * 100).toFixed(1)} %.\n`;
 }
 fs.writeFileSync(path.join(ROOT, 'scripts/calib/REPORT.md'), report); console.log(report);

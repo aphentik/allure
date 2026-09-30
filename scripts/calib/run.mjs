@@ -16,7 +16,7 @@ const FTP = opt('ftp') || 250, KG = opt('kg') || 75, BIKE = opt('bike') || 11;
 const sopt = k => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : null; };
 const OBJ = sopt('obj') || 'diesel', DESC = sopt('desc');
 S.settings.ftp = FTP; S.settings.kg = KG; S.settings.bikeKg = BIKE;
-if (DESC) { S.settings.obj = 'adv'; S.settings.advIF = { chill: 0.68, diesel: 0.75, perf: 0.80 }[OBJ] || 0.75; S.settings.flatIF = { chill: 0.58, diesel: 0.62, perf: 0.66 }[OBJ] || 0.62; S.settings.draftLevel = 'groupe'; S.settings.descLevel = DESC; } else S.settings.obj = OBJ;
+if (DESC) { S.settings.obj = 'adv'; S.settings.advIF = { chill: 0.68, diesel: 0.75, perf: 0.80 }[OBJ] || 0.75; S.settings.flatIF = { chill: 0.58, diesel: 0.62, perf: 0.66 }[OBJ] || 0.62; S.settings.draftLevel = sopt('draft') || 'groupe'; S.settings.descLevel = DESC; } else S.settings.obj = OBJ;
 
 function loadGPX(txt) { const re = /<trkpt lat="([-\d.]+)" lon="([-\d.]+)"[^>]*>([\s\S]*?)<\/trkpt>/g; let m; const pts = []; while ((m = re.exec(txt))) { const b = m[3], e = /<ele>([-\d.]+)<\/ele>/.exec(b), t = /<time>([^<]+)<\/time>/.exec(b), pw = /<(?:ns3:|gpxtpx:)?power>(\d+)</.exec(b), hr = /<(?:ns3:|gpxtpx:)?hr>(\d+)</.exec(b); pts.push({ lat: +m[1], lon: +m[2], ele: e ? +e[1] : null, t: t ? Date.parse(t[1]) / 1000 : null, power: pw ? +pw[1] : null, hr: hr ? +hr[1] : null }); } return pts; }
 function loadActivity(file) { const buf = fs.readFileSync(file); return /\.fit$/i.test(file) ? fitToPoints(parseFIT(buf)) : loadGPX(buf.toString('utf8')); }

@@ -12,8 +12,11 @@ const { computeSegc, solveSpeed, airDensity, MODEL } = await import(ROOT + '/js/
 
 const args = process.argv.slice(2); const dir = args.find(a => !a.startsWith('--')) || 'activites';
 const opt = k => { const i = args.indexOf('--' + k); return i >= 0 ? +args[i + 1] : null; };
-const FTP = opt('ftp') || 250, KG = opt('kg') || 75, BIKE = opt('bike') || 8;
-S.settings.ftp = FTP; S.settings.kg = KG; S.settings.bikeKg = BIKE; S.settings.obj = 'diesel';
+const FTP = opt('ftp') || 250, KG = opt('kg') || 75, BIKE = opt('bike') || 11;
+const sopt = k => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : null; };
+const OBJ = sopt('obj') || 'diesel', DESC = sopt('desc');
+S.settings.ftp = FTP; S.settings.kg = KG; S.settings.bikeKg = BIKE;
+if (DESC) { S.settings.obj = 'adv'; S.settings.advIF = { chill: 0.68, diesel: 0.75, perf: 0.80 }[OBJ] || 0.75; S.settings.flatIF = { chill: 0.58, diesel: 0.62, perf: 0.66 }[OBJ] || 0.62; S.settings.draftLevel = 'groupe'; S.settings.descLevel = DESC; } else S.settings.obj = OBJ;
 
 function loadGPX(txt) { const re = /<trkpt lat="([-\d.]+)" lon="([-\d.]+)"[^>]*>([\s\S]*?)<\/trkpt>/g; let m; const pts = []; while ((m = re.exec(txt))) { const b = m[3], e = /<ele>([-\d.]+)<\/ele>/.exec(b), t = /<time>([^<]+)<\/time>/.exec(b), pw = /<(?:ns3:|gpxtpx:)?power>(\d+)</.exec(b), hr = /<(?:ns3:|gpxtpx:)?hr>(\d+)</.exec(b); pts.push({ lat: +m[1], lon: +m[2], ele: e ? +e[1] : null, t: t ? Date.parse(t[1]) / 1000 : null, power: pw ? +pw[1] : null, hr: hr ? +hr[1] : null }); } return pts; }
 function loadActivity(file) { const buf = fs.readFileSync(file); return /\.fit$/i.test(file) ? fitToPoints(parseFIT(buf)) : loadGPX(buf.toString('utf8')); }
@@ -34,7 +37,7 @@ function predictAtPower(D, s, power, mass, params) {
   return t;
 }
 
-const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => /\.(fit|gpx)$/i.test(f)).map(f => path.join(dir, f)) : [];
+const files = !fs.existsSync(dir) ? [] : fs.statSync(dir).isFile() ? [dir] : fs.readdirSync(dir).filter(f => /\.(fit|gpx)$/i.test(f)).map(f => path.join(dir, f));
 if (!files.length) { console.error('Aucun fichier .fit/.gpx dans', dir); process.exit(1); }
 // mass (rider+bike) that reproduces the real time at real power, bisection
 function massFor(D, s, power, real) { let lo = 50, hi = 150; for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (predictAtPower(D, s, power, mid, {}) < real) lo = mid; else hi = mid; } return (lo + hi) / 2; }
@@ -44,7 +47,7 @@ for (const file of files) {
   const D = buildTrack(pts.map(p => [p.lat, p.lon, p.ele])); const race = { start: '07:00', track: { pts: pts.map(p => [p.lat, p.lon, p.ele]) }, segments: autoSegments(D, {}), waypoints: [] };
   S.race = race; S.D = D; const segc = computeSegc(race, D);
   const hasPower = pts.filter(p => p.power != null).length > pts.length * 0.5;
-  report += '\n## ' + path.basename(file) + '\n' + D.totalKm.toFixed(1) + ' km · ' + D.dplus + ' m D+ · puissance ' + (hasPower ? 'oui' : 'non') + ' · temps en mouvement réel ' + (movingTime(pts, 0, pts.length - 1) / 3600).toFixed(2) + ' h · prévu (pacing Gérer) ' + (segc.reduce((a, s) => a + s.tSec, 0) / 3600).toFixed(2) + ' h\n\n';
+  report += '\n## ' + path.basename(file) + '\n' + D.totalKm.toFixed(1) + ' km · ' + D.dplus + ' m D+ · puissance ' + (hasPower ? 'oui' : 'non') + ' · temps en mouvement réel ' + (movingTime(pts, 0, pts.length - 1) / 3600).toFixed(2) + ' h · prévu (pacing ' + OBJ + (DESC ? '/' + DESC : '') + ') ' + (segc.reduce((a, s) => a + s.tSec, 0) / 3600).toFixed(2) + ' h\n\n';
   report += '| type | km | pente | réel | prévu pacing | écart | P réelle | prévu à P réelle | écart phys. | masse équiv. |\n|---|---|---|---|---|---|---|---|---|---|\n';
   segc.forEach(s => { const i0 = idxAtKm(D, s.from), i1 = idxAtKm(D, s.to), real = movingTime(pts, i0, i1), pw = hasPower ? avgPower(pts, i0, i1) : null;
     const phys = pw != null && s.type === 'climb' ? predictAtPower(D, s, pw, KG + BIKE, {}) : null;
@@ -70,4 +73,4 @@ if (descents.length) {
   for (const aLat of [0.25, 0.32, 0.4, 0.5]) for (const cap of [50, 58, 66, 75]) for (const coastIF of [0.2, 0.3, 0.4]) { let se = 0; descents.forEach(r => { const p = predictAtPower(r.D, r.s, r.pw || FTP * 0.5, KG + BIKE, { aLat, cap, coastIF }); const e = p / r.real - 1; se += e * e; }); const rm = Math.sqrt(se / descents.length); if (!best || rm < best.rm) best = { aLat, cap, coastIF, rm }; }
   report += `\n## Descentes (${descents.length})\n\nMeilleur jeu : a_lat ${best.aLat} g · plafond ${best.cap} km/h · relance ${Math.round(best.coastIF * 100)} % FTP → erreur RMS ${(best.rm * 100).toFixed(1)} %.\n`;
 }
-fs.writeFileSync(path.join(ROOT, 'scripts/calib/REPORT.md'), report); console.log(report);
+const outFile = sopt('out') || path.join(ROOT, 'scripts/calib/REPORT.md'); fs.writeFileSync(outFile, report); console.log(report);

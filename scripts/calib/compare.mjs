@@ -33,6 +33,7 @@ function alignToCourse(fpts) {
   }
   return out;
 }
+function offShare(al, a, b) { let n = 0, o = 0; al.forEach(p => { if (p.km >= a && p.km < b) { n++; if (p.off) o++; } }); return n ? o / n : 0; }
 function timeAtKm(al, km) { for (const p of al) if (p.km >= km - 1e-6) return p.t; return al[al.length - 1].t; }
 function avgPower(al, a, b) { let s = 0, n = 0; al.forEach(p => { if (p.km >= a && p.km < b && p.power != null) { s += p.power; n++; } }); return n ? s / n : null; }
 // stopped time inside [a,b): recording gaps (auto-pause) + seconds where the GPS speed is < 2 km/h
@@ -63,11 +64,11 @@ for (const r of riders) {
   const realTotal = al[al.length - 1].t - start, realStops = stops(al, 0, D.totalKm + 1);
   out += `\n## ${r.name} — FTP ${r.ftp} W · ${r.kg} kg · objectif ${r.obj || 'perf'} · descente ${r.desc || 'expert'}\n\nDépart ${clock(startSec)} le ${dateISO} · réel ${fmt(realTotal)} dont arrêts ${fmt(realStops)} (en mouvement ${fmt(realTotal - realStops)}) · points hors trace ${offPct} %\n`;
   out += `Prévu : préréglage ${fmt(total(runs.preset))} · descente ${r.desc || 'expert'} ${fmt(total(runs.adv))}` + (windRun ? ` · + vent réel ${fmt(total(windRun))}` : '') + '\n\n';
-  out += '| segment | km | prévu | réel (mvt) | arrêts | écart | W cible | W réel | passage prévu | passage réel |\n|---|---|---|---|---|---|---|---|---|---|\n';
+  out += '| segment | km | prévu | réel (mvt) | arrêts | écart | W cible | W réel | passage prévu | passage réel | note |\n|---|---|---|---|---|---|---|---|---|---|---|\n';
   const base = windRun || runs.adv; let cumP = 0;
   base.forEach(s => { cumP += s.tSec; const t0 = timeAtKm(al, s.from), t1 = timeAtKm(al, s.to), st = stops(al, s.from, s.to), real = t1 - t0 - st, pw = avgPower(al, s.from, s.to);
     const target = s.type === 'climb' ? s.w : (s.flatW != null ? s.flatW : null);
-    out += `| ${s.type}${s.type === 'climb' ? ' ' + Math.round(s.pct * 100) + '%' : ''} | ${s.from}→${s.to} | ${fmt(s.tSec)} | ${fmt(real)} | ${st > 30 ? fmt(st) : ''} | ${real > 0 ? ((s.tSec / real - 1) * 100).toFixed(0) + ' %' : ''} | ${target != null ? target + ' W' : ''} | ${pw != null ? Math.round(pw) + ' W' : ''} | ${clock(startSec + cumP)} | ${clock(localSec(t1))} |\n`; });
+    out += `| ${s.type}${s.type === 'climb' ? ' ' + Math.round(s.pct * 100) + '%' : ''} | ${s.from}→${s.to} | ${fmt(s.tSec)} | ${fmt(real)} | ${st > 30 ? fmt(st) : ''} | ${real > 0 ? ((s.tSec / real - 1) * 100).toFixed(0) + ' %' : ''} | ${target != null ? target + ' W' : ''} | ${pw != null ? Math.round(pw) + ' W' : ''} | ${clock(startSec + cumP)} | ${clock(localSec(t1))} | ${offShare(al, s.from, s.to) > 0.2 ? 'hors parcours ' + Math.round(offShare(al, s.from, s.to) * 100) + ' %' : ''} |\n`; });
   const pwAll = avgPower(al, 0, D.totalKm + 1); out += `\nPuissance moyenne réelle ${Math.round(pwAll)} W (${Math.round(pwAll / r.ftp * 100)} % FTP).\n`;
 }
 console.log(out);

@@ -27,13 +27,16 @@ function alignToCourse(fpts) {
   for (const p of fpts) {
     let best = -1, bd = Infinity; const lo = Math.max(0, idx - 40), hi = Math.min(n - 1, idx + 400);
     for (let i = lo; i <= hi; i += 2) { const d = hav(p.lat, p.lon, cpts[i][0], cpts[i][1]); if (d < bd) { bd = d; best = i; } }
-    if (bd < 80) { idx = best; out.push({ t: p.t, km: D.cum[best] / 1000, power: p.power, hr: p.hr, off: false }); } else out.push({ t: p.t, km: D.cum[idx] / 1000, power: p.power, hr: p.hr, off: true });
+    const e = { t: p.t, lat: p.lat, lon: p.lon, power: p.power, hr: p.hr };
+    if (bd < 80) { idx = best; e.km = D.cum[best] / 1000; e.off = false; } else { e.km = D.cum[idx] / 1000; e.off = true; }
+    out.push(e);
   }
   return out;
 }
 function timeAtKm(al, km) { for (const p of al) if (p.km >= km - 1e-6) return p.t; return al[al.length - 1].t; }
 function avgPower(al, a, b) { let s = 0, n = 0; al.forEach(p => { if (p.km >= a && p.km < b && p.power != null) { s += p.power; n++; } }); return n ? s / n : null; }
-function stops(al, a, b) { let st = 0; for (let i = 1; i < al.length; i++) { const p = al[i], q = al[i - 1]; if (p.km < a || p.km >= b) continue; const dt = p.t - q.t; if (dt > 20 && (p.km - q.km) * 1000 / dt * 3.6 < 2) st += dt; else if (dt <= 20 && dt > 0 && (p.km - q.km) * 1000 / dt * 3.6 < 2 && (p.power == null || p.power === 0)) st += dt; } return st; }
+// stopped time inside [a,b): recording gaps (auto-pause) + seconds where the GPS speed is < 2 km/h
+function stops(al, a, b) { let st = 0; for (let i = 1; i < al.length; i++) { const p = al[i], q = al[i - 1]; if (p.km < a || p.km >= b) continue; const dt = p.t - q.t; if (dt <= 0) continue; const v = hav(q.lat, q.lon, p.lat, p.lon) / dt * 3.6; if (dt > 15 || v < 2) st += dt; } return st; }
 
 // historical wind (Open-Meteo archive) at ~12 points along the course, hourly
 async function loadWind(dateISO) {

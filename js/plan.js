@@ -22,7 +22,7 @@ export function computePlanData() {
   const nutri = { gph: np.gph, need: np.need, water: np.water.toFixed(1), gels: np.gelsToCarry, iso: np.isoDoses, waterBottles: np.waterBottles, ravitoGels: np.ravitoGels, ravito: np.ravito, perGelMin: np.perGelMin, gelsPerH: np.gelsPerH, stops: np.stops, optCodes: np.optCodes, hasRavitos: np.hasRavitos };
   return { ftp, kg, startSec, totalSec: cum, arrival: startSec + cum, avgWkg: wkgSum / (nClimb || 1), nClimb, rows, nutri, segc };
 }
-export function objLabel() { const o = S.settings.obj; return o === 'adv' ? t('o4') + ' ' + Math.round(S.settings.advIF * 100) + '% FTP' : t('o' + (o === 'chill' ? '1' : o === 'diesel' ? '2' : '3')); }
+export function objLabel() { const o = S.settings.obj; return o === 'adv' ? t('o4') + ' ' + Math.round(S.settings.advIF * 100) + '% FTP' : o === 'race' ? t('o5') : t('o' + (o === 'chill' ? '1' : o === 'diesel' ? '2' : '3')); }
 
 export function compute() {
   if (!S.race || !S.D) return;
@@ -48,10 +48,10 @@ export function compute() {
     const warn = s.warn ? '<div class="cue warn">⚠ ' + esc(s.warn) + '</div>' : '';
     const extra = (rav || bar) ? '<div class="rzone">' + rav + bar + '</div>' : '';
     if (s.type === 'climb') { wkgSum += s.w / kg; nClimb++; idx++;
-      html += '<div class="col ' + (s.key ? 'key' : '') + '" data-seg="' + s.id + '"><div class="idx">' + idx + '</div><div><div class="name">' + esc(segName(s, idx)) + '</div><div class="spec">km ' + s.from + '→' + s.to + ' · ' + s.grad + '% · ' + Math.round(s.pct * 100) + '% FTP</div>' + (s.cue ? '<div class="cue">' + esc(s.cue) + '</div>' : '') + warn + extra + '</div><div class="nums"><div class="w">' + s.w + '<span class="u">w</span></div><div class="wkg">' + (s.w / kg).toFixed(1) + ' W/kg</div><div class="t">' + (s.to - s.from).toFixed(1) + ' km · ' + fmtDur(s.tSec) + '</div><div class="pass">' + t('tlPass') + ' ' + fmtClock(startSec + cum) + '</div></div></div>';
+      html += '<div class="col ' + (s.key ? 'key' : '') + (s.startPhase ? ' start' : '') + '" data-seg="' + s.id + '"><div class="idx">' + idx + '</div><div><div class="name" data-start="' + t('tlStart') + '">' + esc(segName(s, idx)) + '</div><div class="spec">km ' + s.from + '→' + s.to + ' · ' + s.grad + '% · ' + Math.round(s.pct * 100) + '% FTP</div>' + (s.cue ? '<div class="cue">' + esc(s.cue) + '</div>' : '') + warn + extra + '</div><div class="nums"><div class="w">' + s.w + '<span class="u">w</span></div><div class="wkg">' + (s.w / kg).toFixed(1) + ' W/kg</div><div class="t">' + (s.to - s.from).toFixed(1) + ' km · ' + fmtDur(s.tSec) + '</div><div class="pass">' + t('tlPass') + ' ' + fmtClock(startSec + cum) + '</div></div></div>';
     } else {
       const mode = s.flatW != null ? Math.round(s.flatPct * 100) + '% FTP' : (s.ravitos && s.ravitos.length ? t('tlRecupRav') : t('tlRecup'));
-      html += '<div class="liaison" data-seg="' + s.id + '"><div class="dot">' + (s.type === 'descent' ? '↓' : '→') + '</div><div><div class="ln">' + esc(segName(s)) + '</div><div class="ls">km ' + s.from + '→' + s.to + ' · ' + mode + ' · ≈ ' + Math.round(s.spd * 3.6) + ' km/h</div>' + (s.cue ? '<div class="cue">' + esc(s.cue) + '</div>' : '') + warn + extra + '</div><div class="lt">' + (s.flatW != null ? '<div class="lw">' + s.flatW + '<span class="u">w</span></div>' : '') + (s.to - s.from).toFixed(1) + ' km · ≈ ' + fmtDur(s.tSec) + '<div class="lp">' + t('tlPass') + ' ' + fmtClock(startSec + cum) + '</div></div></div>';
+      html += '<div class="liaison' + (s.startPhase ? ' start' : '') + '" data-seg="' + s.id + '"><div class="dot">' + (s.type === 'descent' ? '↓' : '→') + '</div><div><div class="ln" data-start="' + t('tlStart') + '">' + esc(segName(s)) + '</div><div class="ls">km ' + s.from + '→' + s.to + ' · ' + mode + ' · ≈ ' + Math.round(s.spd * 3.6) + ' km/h</div>' + (s.cue ? '<div class="cue">' + esc(s.cue) + '</div>' : '') + warn + extra + '</div><div class="lt">' + (s.flatW != null ? '<div class="lw">' + s.flatW + '<span class="u">w</span></div>' : '') + (s.to - s.from).toFixed(1) + ' km · ≈ ' + fmtDur(s.tSec) + '<div class="lp">' + t('tlPass') + ' ' + fmtClock(startSec + cum) + '</div></div></div>';
     }
   });
   document.getElementById('timeline').innerHTML = html;

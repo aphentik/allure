@@ -21,18 +21,20 @@ export function solveSpeed(power, mass, gradPct, opt) {
   for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (f(mid) > 0) hi = mid; else lo = mid; }
   return (lo + hi) / 2;
 }
-export const BASE = { chill: 0.68, diesel: 0.75, perf: 0.80 };
+export const BASE = { chill: 0.68, diesel: 0.75, perf: 0.80, race: 0.77 };
+// 'race' (course en groupe): fast start to catch a pack, then a slightly lower base to pay for it
+export const RACE = { startIF: 1.05, startFlatIF: 0.85, defaultStartMin: 20 };
 // descending level → lateral acceleration accepted in corners (g) and absolute cap (km/h)
 // calibrated 2026-09-24 on 4 FIT activities (8 descents): an 'expert' rider matched a_lat ≈ 0.5 g / 75 km/h
 export const DESC_LEVELS = { prudent: { aLat: 0.28, cap: 52 }, standard: { aLat: 0.35, cap: 62 }, confirme: { aLat: 0.45, cap: 70 }, expert: { aLat: 0.55, cap: 80 } };
 export const DRAFT_LEVELS = { seul: 0, groupe: 0.20, peloton: 0.40 };
 // flat / descent model presets per objective; 'adv' uses the user's own settings
-const PRESETS = { chill: { flatIF: 0.58, draft: 0.20, descLevel: 'prudent' }, diesel: { flatIF: 0.62, draft: 0.20, descLevel: 'standard' }, perf: { flatIF: 0.66, draft: 0.20, descLevel: 'confirme' } };
+const PRESETS = { chill: { flatIF: 0.58, draft: 0.20, descLevel: 'prudent', coastIF: 0.30 }, diesel: { flatIF: 0.62, draft: 0.20, descLevel: 'standard', coastIF: 0.30 }, perf: { flatIF: 0.66, draft: 0.20, descLevel: 'confirme', coastIF: 0.30 }, race: { flatIF: 0.70, draft: 0.40, descLevel: 'expert', coastIF: 0.50 } };
 export function modelParams() {
   const s = S.settings;
-  const p = s.obj !== 'adv' ? (PRESETS[s.obj] || PRESETS.diesel) : { flatIF: s.flatIF, draft: DRAFT_LEVELS[s.draftLevel] != null ? DRAFT_LEVELS[s.draftLevel] : (s.draft || 0.2), descLevel: DESC_LEVELS[s.descLevel] ? s.descLevel : 'standard' };
+  const p = s.obj !== 'adv' ? (PRESETS[s.obj] || PRESETS.diesel) : { flatIF: s.flatIF, draft: DRAFT_LEVELS[s.draftLevel] != null ? DRAFT_LEVELS[s.draftLevel] : (s.draft || 0.2), descLevel: DESC_LEVELS[s.descLevel] ? s.descLevel : 'standard', coastIF: 0.30 };
   const lv = DESC_LEVELS[p.descLevel] || DESC_LEVELS.standard;
-  return { flatIF: p.flatIF, draft: p.draft, descLevel: p.descLevel, aLat: lv.aLat, capKmh: lv.cap };
+  return { flatIF: p.flatIF, draft: p.draft, descLevel: p.descLevel, aLat: lv.aLat, capKmh: lv.cap, coastIF: p.coastIF, race: s.obj === 'race', startSec: (s.raceStartMin || RACE.defaultStartMin) * 60 };
 }
 export function baseIntensity() { const s = S.settings; return s.obj === 'adv' ? s.advIF : (BASE[s.obj] || BASE.diesel); }
 export function ftpVal() { return Math.max(60, +S.settings.ftp || 0); }
@@ -55,9 +57,9 @@ function cornerLimit(D, i, aLat) {
 function stepSpeed(mode, g, alt, ctx) {
   const { ftp, mass, st, w, wind } = ctx, rho = airDensity(alt);
   let v;
-  if (g <= -1.5) v = Math.min(solveSpeed(ftp * MODEL.coastIF, mass, g, { CdA: MODEL.CdAdesc, rho, wind }), st.capKmh / 3.6);
+  if (g <= -1.5) v = Math.min(solveSpeed(ftp * st.coastIF, mass, g, { CdA: MODEL.CdAdesc, rho, wind }), st.capKmh / 3.6);
   else if (mode === 'climb') v = solveSpeed(w, mass, g, { rho, wind });
-  else v = solveSpeed(ftp * st.flatIF, mass, g, { CdA: MODEL.CdA * (1 - st.draft), rho, wind });
+  else v = solveSpeed(ftp * (ctx.flatIF != null ? ctx.flatIF : st.flatIF), mass, g, { CdA: MODEL.CdA * (1 - st.draft), rho, wind });
   return Math.max(mode === 'climb' && g > -1.5 ? 0.5 : MODEL.vMin, Math.min(v, MODEL.vMax)); // no floor on climbs (steep walls are slow)
 }
 
@@ -66,29 +68,37 @@ function stepSpeed(mode, g, alt, ctx) {
 export function computeSegc(race, D, opt) {
   const st = modelParams(), ftp = ftpVal(), kg = kgVal(), mass = kg + (S.settings.bikeKg || 11), base = baseIntensity();
   const windFn = opt && opt.windFn, wps = race.waypoints || [];
+  let elapsed = 0; // running time, needed for the race start phase
   return race.segments.map(s => {
-    const len = s.to - s.from; let spd, w = null, pct = null;
-    if (s.type === 'climb') { pct = Math.max(0.55, base + (s.delta || 0)); w = Math.round(ftp * pct); }
+    const len = s.to - s.from; let spd, w = null, pct = null, startPhase = false, flatW = null;
+    const basePct = s.type === 'climb' ? Math.max(0.55, base + (s.delta || 0)) : null;
+    if (s.type === 'climb') { w = Math.round(ftp * basePct); pct = basePct; }
+    if (s.type === 'flat') flatW = Math.round(ftp * st.flatIF);
+    if (st.race && elapsed < st.startSec) startPhase = true;
     if (s.speedKmh && s.type !== 'climb') spd = s.speedKmh / 3.6;
     else if (D && len > 0) {
-      let tsum = 0, k = s.from;
+      let tsum = 0, k = s.from, wSum = 0, fSum = 0;
       while (k < s.to - 1e-9) {
         const k2 = Math.min(s.to, k + PROFILE_STEP_KM), km = (k + k2) / 2;
         const g = D.hasEle ? (altAtKm(D, k2) - altAtKm(D, k)) / ((k2 - k) * 1000) * 100 : 0;
-        let v = stepSpeed(s.type, g, D.hasEle ? altAtKm(D, km) : 0, { ftp, mass, st, w, wind: headwind(race, D, km, windFn) });
+        const inStart = st.race && (elapsed + tsum) < st.startSec;
+        const wStep = s.type === 'climb' ? Math.round(ftp * (inStart ? RACE.startIF : basePct)) : null, fStep = inStart ? RACE.startFlatIF : st.flatIF;
+        let v = stepSpeed(s.type, g, D.hasEle ? altAtKm(D, km) : 0, { ftp, mass, st, w: wStep, flatIF: fStep, wind: headwind(race, D, km, windFn) });
         if (g < 0) v = Math.min(v, cornerLimit(D, Math.round(km / PROFILE_STEP_KM), st.aLat));
-        tsum += (k2 - k) * 1000 / v; k = k2;
+        const dt = (k2 - k) * 1000 / v; tsum += dt; if (wStep != null) wSum += wStep * dt; fSum += fStep * dt; k = k2;
       }
       spd = len * 1000 / tsum;
+      if (s.type === 'climb') { w = Math.round(wSum / tsum); pct = w / ftp; }
+      if (s.type === 'flat') { flatW = Math.round(ftp * fSum / tsum); }
     } else spd = stepSpeed(s.type, s.grad || 0, 0, { ftp, mass, st, w, wind: 0 });
+    elapsed += len * 1000 / spd;
     const inSeg = wp => wp.km >= s.from - 1e-6 && wp.km < s.to + (s.to >= D.totalKm - 1e-6 ? 1 : 0) + 1e-6;
     const ravitos = wps.filter(w2 => w2.kind === 'ravito' && inSeg(w2)).map(w2 => ({ k: w2.code, km: w2.km, t: w2.name + (w2.desc ? ' · ' + w2.desc : '') }));
     const bars = wps.filter(w2 => w2.kind === 'barrier' && w2.time && inSeg(w2));
     const barrier = bars.length ? { km: bars[0].km, time: bars[0].time, label: bars[0].name } : null;
     const dangers = wps.filter(w2 => w2.kind === 'danger' && inSeg(w2));
     const warn = dangers.map(d => d.name).filter(Boolean).join(' · ');
-    const flatW = s.type === 'flat' ? Math.round(ftp * st.flatIF) : null;
-    return Object.assign({}, s, { spd, tSec: len * 1000 / spd, w, pct, wkg: w != null ? w / kg : null, flatW, flatPct: flatW != null ? st.flatIF : null, ravitos, barrier, barriers: bars, warn, dangers });
+    return Object.assign({}, s, { spd, tSec: len * 1000 / spd, w, pct, wkg: w != null ? w / kg : null, flatW, flatPct: flatW != null ? flatW / ftp : null, startPhase, ravitos, barrier, barriers: bars, warn, dangers });
   });
 }
 // Segments with the wind function established by the last compute() (same result for every consumer)

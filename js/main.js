@@ -47,6 +47,7 @@ function syncInputs() {
   $('start').value = S.race ? S.race.start : '07:00';
   document.querySelectorAll('#obj button').forEach(b => b.setAttribute('aria-pressed', b.dataset.o === st.obj));
   $('advWrap').style.display = st.obj === 'adv' ? '' : 'none';
+  $('raceWrap').style.display = st.obj === 'race' ? '' : 'none'; $('raceStart').value = st.raceStartMin || 20; $('raceStartV').textContent = st.raceStartMin || 20;
   $('advRange').value = Math.round(st.advIF * 100); updateAdv();
   $('flatIF').value = Math.round(st.flatIF * 100); $('flatIFV').textContent = Math.round(st.flatIF * 100);
   if (document.activeElement !== $('bikeKg')) $('bikeKg').value = st.bikeKg;
@@ -74,7 +75,7 @@ function showTab(w) {
 // ---- language / static texts ----
 function applyLang() {
   document.documentElement.setAttribute('lang', S.lang);
-  ['eyebrow', 'profcap', 'dataTitle', 'labFtp', 'labKg', 'labStart', 'goalTitle', 'o1', 'o1s', 'o2', 'o2s', 'o3', 'o3s', 'o4', 'o4s', 'advLabel', 'advUnit', 'advMore', 'labBike', 'bikeHint', 'labFlatIF', 'flatHint', 'labDraft', 'labDescCap', 'modelNote',
+  ['eyebrow', 'profcap', 'dataTitle', 'labFtp', 'labKg', 'labStart', 'goalTitle', 'o1', 'o1s', 'o2', 'o2s', 'o3', 'o3s', 'o4', 'o4s', 'o5', 'o5s', 'raceStartLab', 'raceStartHint', 'advLabel', 'advUnit', 'advMore', 'labBike', 'bikeHint', 'labFlatIF', 'flatHint', 'labDraft', 'labDescCap', 'modelNote',
     'nutTitle', 'labGph', 'labGel', 'labBidon', 'labBsize', 'nutIsoTitle', 'nutIsoLab', 'nutRvTitle', 'rv1', 'rv2', 'nutRatesT', 'nutCarryT', 'nutPlanT',
     'mTitle', 'mHint', 'soP', 'soL', 'gxTitle', 'gxAutre', 'gxHint', 'wxTitle', 'wxDetail',
     'tabPlan', 'tabNutri', 'tabWx', 'tabCheck', 'chkTitle', 'chkIntro', 'chkReset', 'emptyTitle', 'emptyText', 'cfgTitle'].forEach(id => setText(id, id));
@@ -119,6 +120,7 @@ function wire() {
   ['ftp', 'kg'].forEach(id => $(id).addEventListener('input', () => { S.settings[id] = +$(id).value || S.settings[id]; savePrefs(); compute(); }));
   $('start').addEventListener('change', () => { if (!S.race) return; S.race.start = $('start').value || '07:00'; saveRace(); compute(); renderConfig(); });
   $('obj').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.settings.obj = b.dataset.o; savePrefs(); syncInputs(); compute(); });
+  $('raceStart').addEventListener('input', () => { S.settings.raceStartMin = +$('raceStart').value; $('raceStartV').textContent = $('raceStart').value; savePrefs(); compute(); });
   $('advRange').addEventListener('input', () => { S.settings.advIF = (+$('advRange').value) / 100; updateAdv(); savePrefs(); compute(); });
   $('bikeKg').addEventListener('input', () => { const v = parseFloat(String($('bikeKg').value).replace(',', '.')); if (isFinite(v) && v >= 5 && v <= 25) { S.settings.bikeKg = v; savePrefs(); compute(); } });
   $('flatIF').addEventListener('input', () => { S.settings.flatIF = (+$('flatIF').value) / 100; $('flatIFV').textContent = $('flatIF').value; savePrefs(); compute(); });

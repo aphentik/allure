@@ -65,7 +65,8 @@ Lien profond : `index.html?gpx=<url-du-gpx>` charge directement une trace (même
 - Plat : FTP × `flatIF`, CdA réduit par l'abri (`draftLevel` : seul 0 %, petit groupe 20 %, peloton 40 %).
 - Descente (pente < −1,5 %) : roue libre à 30 % FTP, limitée en virage par `v = sqrt(a_lat · g · R)` avec le rayon de courbure `R` de la trace et `a_lat` selon `descLevel` (prudent 0,28 g / ≤ 52 km/h, standard 0,35 g / ≤ 62, confirmé 0,45 g / ≤ 70, expert 0,55 g / ≤ 80).
 - Vent : si une prévision existe (date ≤ 16 j), la composante face/dos à l'heure de passage entre dans la traînée (vent à 10 m × 0,7) ; le calcul itère une ou deux fois entre heures de passage et vent.
-- Ces réglages ne sont libres qu'en objectif « Avancé » ; les autres objectifs utilisent des présélections (Finir tranquille 58 % · prudent, Gérer l'effort 62 % · standard, Performer 66 % · confirmé).
+- Ces réglages ne sont libres qu'en objectif « Avancé » ; les autres objectifs utilisent des présélections (Finir tranquille 58 % · prudent, Gérer l'effort 62 % · standard, Performer 66 % · confirmé, Course en groupe 70 % · peloton · expert).
+- Objectif « Course en groupe » : départ rapide pendant une durée réglable (10–40 min, défaut 20) à 105 % FTP en montée et 85 % sur le plat pour accrocher un groupe, puis base 77 % en montée, abri peloton (40 %) et descentes pédalées (relance à 50 % FTP). Calibré sur deux coureurs aux Bosses du 13 2026 : −2 % et +6 % sur le temps en mouvement.
 - Calibration : `scripts/calib/` compare le modèle à des activités réelles (voir plus bas) pour régler ces constantes.
 
 ## Versions
